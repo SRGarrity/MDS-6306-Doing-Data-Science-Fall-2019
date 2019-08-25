@@ -10,5 +10,3 @@
 4. Other supporting material needed for each Unit
 
 Have a Blast and see you in Live Session!
-
-Four
