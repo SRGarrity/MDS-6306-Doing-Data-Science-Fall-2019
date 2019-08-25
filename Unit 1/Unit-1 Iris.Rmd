@@ -1,0 +1,20 @@
+---
+title: "Unit-1 Iris"
+author: "Steven Garrity"
+date: "8/25/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Iris Data
+## Summary of Sepal Length
+
+```{r}
+#summary of the iris data
+summary(iris$Sepal.Length)
+```
+
+```{r}
+hist(iris$Sepal.Length, col='blue', main='Histogram of Iris Sepal Length')
+```
