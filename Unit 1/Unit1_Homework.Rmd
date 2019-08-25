@@ -1,0 +1,26 @@
+---
+title: "Unit-1 Homework"
+author: "Steven Garrity"
+date: "8/25/2019"
+output: html_document
+---
+
+### My Data Science Profile
+```{r}
+labels = c("Data Viz","ML","Math","Stats","CS", "Comms","Domain")
+myscores = c(1.5,2.5,1,2,1.5,2,0)
+myprofile = data.frame(Category=labels, Score=myscores)
+barplot(myprofile$Score, names.arg=myprofile$Category, col='blue', 
+        ylab="Score", main="Garrity DS Profile", ylim=c(0,5))
+```
+
+### Chi-square population
+```{r}
+population = rchisq(10000000, df=2)
+hist(population, main="Chi-Square Population")
+```
+```{r}
+mean(population)
+sd(population)
+```
+
