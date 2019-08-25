@@ -323,8 +323,8 @@ What is the shape of the distribuion?  What is the mean and sd?  What should the
 ```{r}
 xBarVec = c() #global vector to hold the sample means
 #####################################################
-# Funciton: xbarGenerator (Adpated)
-# Argements: samplesize: the size of the sample that each sample mean is based on. 
+# Function: xbarGenerator (Adpated)
+# Arguments: samplesize: the size of the sample that each sample mean is based on. 
 #            number_of_samples: the number of samples and thus sample means we will generate
 # Author: Bivin Sadler
 #####################################################
