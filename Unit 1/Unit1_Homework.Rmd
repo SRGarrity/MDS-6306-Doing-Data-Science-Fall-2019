@@ -17,10 +17,51 @@ barplot(myprofile$Score, names.arg=myprofile$Category, col='blue',
 ### Chi-square population
 ```{r}
 population = rchisq(10000000, df=2)
-hist(population, main="Chi-Square Population")
 ```
+
 ```{r}
-mean(population)
-sd(population)
+hist(population, main="Distribution of the chi-square population, N=10,000,000")
+#text(25,3800000,expression(paste(mu, "=")))
+text(25,3800000, bquote(mu == .(mean(population))))
+text(25,3500000, bquote(sigma == .(sd(population))))
 ```
+#### Control Parameters
+```{r}
+n = 50 # sample size per sample for 1st distribution
+simulations = 10000 #number of xbars we will generate.
+```
+
+#### Data Holder
+```{r}
+xbar_holder1 = numeric(simulations) # This will hold all the sample means for the chi-square distribution.
+```
+
+#### Simulate and Store
+Generate 10000 samples each of size 50 and find the mean of each sample.  Then store each mean in the xbar_holder vector.
+```{r}
+for (i in 1:simulations)
+{ 
+  sample1 = sample(population,n)
+  xbar1 = mean(sample1)
+  xbar_holder1[i] = xbar1
+}
+```
+
+## display the distribution of sample means (plot a histogram of the sample means)
+```{r}
+require(grDevices)
+
+hist(xbar_holder1, col = "blue", main = paste("Distribution of the sample mean: n = ", n), xlab = "Sample Means", xlim = c(0,4))
+text(3.25,2250, bquote(bar(x) == .(mean(xbar_holder1))))
+text(3.25,2000, bquote(s == .(sd(xbar_holder1))))
+```
+
+
+
+## summary statistics of the distribution of the simulated sample means. 
+```{r}
+summary(xbar_holder1) #5 number summary and the mean
+sd(xbar_holder1) # standard deviation of dstribuion 1
+```
+
 
