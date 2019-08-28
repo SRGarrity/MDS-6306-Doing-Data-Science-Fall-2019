@@ -8,7 +8,7 @@ output: html_document
 ### My Data Science Profile
 ```{r}
 labels = c("Data Viz","ML","Math","Stats","CS", "Comms","Domain")
-myscores = c(1.5,2.1,1,1.9,1.5,2,0)
+myscores = c(1,1.5,0.5,1.5,1,1.5,0)
 myprofile = data.frame(Category=labels, Score=myscores)
 frame()
 barplot(myprofile$Score, names.arg=myprofile$Category, col='lightsteelblue3', 
