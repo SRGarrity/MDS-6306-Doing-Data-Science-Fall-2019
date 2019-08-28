@@ -8,10 +8,16 @@ output: html_document
 ### My Data Science Profile
 ```{r}
 labels = c("Data Viz","ML","Math","Stats","CS", "Comms","Domain")
-myscores = c(1.5,2.5,1,2,1.5,2,0)
+myscores = c(1.5,2.1,1,1.9,1.5,2,0)
 myprofile = data.frame(Category=labels, Score=myscores)
+frame()
 barplot(myprofile$Score, names.arg=myprofile$Category, col='lightsteelblue3', 
-        ylab="Score", main="Garrity DS Profile", ylim=c(0,5))
+        ylab="Score", main="Garrity DS Profile", ylim=c(0,4))
+
+
+
+grid(NA, 4, lwd = 2)
+
 ```
 
 ### Chi-square population
@@ -51,7 +57,7 @@ for (i in 1:simulations)
 ```{r}
 require(grDevices)
 
-hist(xbar_holder1, col = "gray", main = paste("Distribution of the sample mean: n = ", n), xlab = "Sample Means", xlim = c(0,4))
+hist(xbar_holder1, col = "lightsteelblue3", main = paste("Distribution of the sample mean: n = ", n), xlab = "Sample Means", xlim = c(0,4))
 text(3.25,2250, bquote(bar(x) == .(mean(xbar_holder1))))
 text(3.25,2000, bquote(s == .(sd(xbar_holder1))))
 ```
