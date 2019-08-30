@@ -3,6 +3,8 @@ title: "Unit-1 Homework"
 author: "Steven Garrity"
 date: "8/25/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ### My Data Science Profile
@@ -12,7 +14,7 @@ myscores = c(1,1.5,0.5,1.5,1,1.5,0)
 myprofile = data.frame(Category=labels, Score=myscores)
 frame()
 barplot(myprofile$Score, names.arg=myprofile$Category, col='lightsteelblue3', 
-        ylab="Score", main="Garrity DS Profile", ylim=c(0,4))
+        ylab="Score", main="DS Profile", ylim=c(0,4))
 
 
 
@@ -58,8 +60,8 @@ for (i in 1:simulations)
 require(grDevices)
 
 hist(xbar_holder1, col = "lightsteelblue3", main = paste("Distribution of the sample mean: n = ", n), xlab = "Sample Means", xlim = c(0,4))
-text(3.25,2250, bquote(bar(x) == .(mean(xbar_holder1))))
-text(3.25,2000, bquote(s == .(sd(xbar_holder1))))
+text(3.25, 2250, bquote(bar(x) == .(mean(xbar_holder1))))
+text(3.25, 2000, bquote(s == .(sd(xbar_holder1))))
 ```
 
 
@@ -95,5 +97,5 @@ plot(t.test(patron_age, mu=21))
 ```
 
 ```{r}
-colors()[1:500]
+# colors()[1:500] #
 ```
