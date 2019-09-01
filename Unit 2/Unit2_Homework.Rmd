@@ -1,0 +1,46 @@
+---
+title: "DDS_Unit2_Homework"
+author: "Steven Garrity"
+date: "9/1/2019"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r "ls", echo=FALSE}
+system("ls")
+```
+
+## Load Data:
+```{r}
+setwd("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 2/")
+playerbb = read.csv("PlayersBBall.csv", header = TRUE)
+summary(playerbb)
+```
+
+
+## Question 1
+
+Use the PlayerBBall.csv dataset to visually represent (summarize) the number of players in each position.
+
+```{r}
+library(ggplot2)
+playerbb %>% ggplot(aes(x=position)) + geom_bar
+
+#mpg %>% ggplot(aes(x = class)) + geom_bar() + ggtitle("Distribution of Class")
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
