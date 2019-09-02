@@ -228,7 +228,8 @@ geom_smooth(mapping = aes(x = hwy, y = cty))
 ggplot(data = mpg) + 
 geom_smooth(mapping = aes(x = hwy, y = cty, linetype = drv))
 
-mpg %>% ggplot(aes(x = hwy, y = cty, linetype = drv, color=drv)) + geom_point() + geom_smooth()
+mpg %>% ggplot(aes(x = hwy, y = cty, linetype=drv, color=drv)) + geom_point() + geom_smooth()
+# mpg %>% ggplot(aes(x = hwy, y = cty, color=drv)) + geom_point(shape=mpg$drv) + geom_smooth()
 
 
 
@@ -249,10 +250,12 @@ ggplot(data = mpg) + geom_point(mapping = aes(x = hwy, y = cty, color = class)) 
 
 ### labels
 ```{r}
-ggplot(data = mpg, aes(x = class, y = cty)) + 
-geom_boxplot() + 
-ggtitle("Boxplot of City MPG v. Class") + 
-xlab("Class") + ylab("City MPG")
+# ggplot(data = mpg, aes(x = class, y = cty)) + 
+# geom_boxplot() + 
+# ggtitle("Boxplot of City MPG v. Class") + 
+# xlab("Class") + ylab("City MPG")
+
+mpg %>% ggplot(aes(x = class, y = cty)) + geom_boxplot() + ggtitle("Boxplot of City MPG v. Class") + xlab("Class") + ylab("City MPG")
 ```
 
 
@@ -282,6 +285,8 @@ facet_grid(drv~class)
 ggplot(data = mpg, aes(fill = drv)) + 
 geom_histogram(mapping = aes(x = cty)) +
 facet_grid(drv~class)
+
+mpg %>% ggplot(aes(x = cty, y = hwy, color = drv)) + geom_point() + facet_grid(cyl~year)
 
 ```
 
@@ -319,36 +324,35 @@ mpg %>% ggplot(mapping = aes(x = class, fill = drv)) + geom_bar(position = "fill
 
 ### jitter
 ```{r}
-mpg %>% 
-+ ggplot(mapping = aes(x = hwy, y = cty)) + 
-+ geom_point()
+mpg %>% ggplot(mapping = aes(x = hwy, y = cty)) + geom_point()
 
 mpg %>% 
-+ ggplot(mapping = aes(x = hwy, y = cty)) + 
-+ geom_point(position = "jitter")
+ggplot(mapping = aes(x = hwy, y = cty)) + 
+geom_point(position = "jitter") +
+  geom_smooth()
 
 ```
 
 ## Other Coordinate Systems
 ### coord_flip
 ```{r}
-mpg %>% + ggplot(mapping = aes(x = class, fill = class)) + geom_bar() + coord_flip()
+mpg %>% ggplot(mapping = aes(x = class, fill = class)) + geom_bar() + coord_flip()
 ```
 
 ### coord_polar
 ```{r}
-mpg %>% + ggplot(mapping = aes(x = class, fill = class)) + geom_bar() + coord_polar()
+mpg %>% ggplot(mapping = aes(x = class, fill = class)) + geom_bar() + coord_polar()
 ```
 
 ### coord_quickmap and map_data
 ```{r}
-install.packages("maps")
-library()
+# install.packages("maps")
+library(maps)
 
 usa = map_data("usa")
 
 p <- ggplot() + 
-  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "blue", color = "black") + 
+  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "steelblue", color = "black") + 
   coord_quickmap()
 
 #Dallas Coords
@@ -370,37 +374,42 @@ coord_quickmap()
 
 ## themes
 ```{r}
-install.package("ggthemes")
+# install.package("ggthemes")
 library(ggthemes)
 
 #excel
-ggplot(mapping = aes(x = hwy, y = cty)) + 
-geom_point(position = "jitter") + 
-ggtitle("City MPG v. Highway MPG") + 
-theme_excel()
+mpg %>% ggplot(mapping = aes(x = hwy, y = cty)) + 
+  geom_point(position = "jitter") + 
+  ggtitle("City MPG v. Highway MPG") + 
+  theme_excel()
 
-mpg %>% 
-+ ggplot(mapping = aes(x = class, fill = class)) +  geom_bar() + theme_excel()
+mpg %>% ggplot(mapping = aes(x = class, fill = class)) +  
+  geom_bar() + 
+  theme_excel()
 
 #Economist
-ggplot(mapping = aes(x = hwy, y = cty)) + 
+mpg %>% ggplot(mapping = aes(x = hwy, y = cty)) + 
 geom_point(position = "jitter") + 
 ggtitle("City MPG v. Highway MPG") + 
 theme_economist()
 
-mpg %>% 
-+ ggplot(mapping = aes(x = class)) +  geom_bar() + theme_economist()
+mpg %>% ggplot(mapping = aes(x = class)) +  geom_bar() + theme_economist()
 
 #538
-ggplot(mapping = aes(x = hwy, y = cty)) + 
+mpg %>% ggplot(mapping = aes(x = hwy, y = cty)) + 
 geom_point(position = "jitter") + 
 ggtitle("City MPG v. Highway MPG") + 
 theme_fivethirtyeight()
 
-mpg %>% +
-ggplot(mapping = aes(x = class, fill = class)) +  
+mpg %>% ggplot(mapping = aes(x = class, fill = class)) +  
 geom_bar() + ggtitle("Vehicle Class") + 
 theme_fivethirtyeight()
+
+#WSJ
+mpg %>% ggplot(mapping = aes(x = hwy, y = cty)) + 
+geom_point(position = "jitter") + 
+ggtitle("City MPG v. Highway MPG") + 
+theme_wsj()
 
 ```
 
@@ -411,9 +420,10 @@ theme_fivethirtyeight()
 library(ggthemes)
 library(plotly)
 
-p = mpg %>% 
-ggplot(mapping = aes(x = hwy, y = cty)) + 
-geom_point(position = "jitter") + ggtitle("City MPG v. Highway MPG") + theme_excel()
+p = mpg %>% ggplot(mapping = aes(x = hwy, y = cty)) + 
+  geom_point(position = "jitter") + 
+  ggtitle("City MPG v. Highway MPG") + 
+  theme_excel()
  
 ggplotly(p)
 
