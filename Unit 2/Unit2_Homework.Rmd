@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(ggplot2)
 library(dplyr)
+library(tidyverse)
 ```
 
 ```{r "ls", echo=FALSE}
@@ -28,13 +29,29 @@ summary(playerbb)
 Use the PlayerBBall.csv dataset to visually represent (summarize) the number of players in each position.
 
 ```{r, echo=FALSE}
-playerbb %>% ggplot(aes(x=position)) + geom_bar() + ggtitle("Number of Players in Each Position")
+playerbb %>% ggplot(aes(x=position, fill=position)) + geom_bar() + ggtitle("Number of Players in Each Position")
 ```
 
 ## Question 2
 Use the dataset to visually investigate the distribution of the weight of centers (C) is greater than the distribution of the weight of forwards (F).
 
 ```{r}
+# test <- playerbb %>% pull(weight)
+player_weights <- playerbb[(playerbb$position == "C" | playerbb$position == "F"),]
+
+# the next two plots are identical, however, I can't get a legend to show
+ggplot(playerbb, aes(x=weight)) +
+  geom_histogram(data=subset(playerbb, position == "F"), color = "black", fill = "blue", alpha = 0.7) +
+  geom_histogram(data=subset(playerbb, position == "C"), color = "black", fill = "red", alpha = 0.7)
+
+ggplot(player_weights, aes(x=weight)) +
+  geom_histogram(data=subset(player_weights, position == "F"), color = "black", fill = "blue", alpha = 0.7) +
+  geom_histogram(data=subset(player_weights, position == "C"), color = "black", fill = "red", alpha = 0.7)
+
+# try something different
+weight_C <- subset(playerbb, position == "C", select=c(weight,position))
+weight_F <- subset(playerbb, position == "F", select=c(weight,position))
+  
 
 ```
 
