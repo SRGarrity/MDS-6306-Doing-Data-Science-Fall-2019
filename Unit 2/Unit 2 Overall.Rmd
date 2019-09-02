@@ -3,6 +3,8 @@ title: "Unit 2 Visualization"
 author: "Bivin"
 date: "4/28/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## UNIT 2 R Quick Start / Scatterplot, histogram and bar plot.R
@@ -26,7 +28,7 @@ iris %>% ggplot(aes(x = Sepal.Length,y = Petal.Length)) + geom_point() + ggtitle
 # You Try It! (mpg)
 # plot (scatter plot) city mile per gallon (y) versus highway miles per gallon (x).
 
-mpg %>% ggplot(aes(x = hwy, y = cty)) + geom_point() + ggtitle("City MPG v. Highway MPG")
+mpg %>% ggplot(aes(x = hwy, y = cty)) + geom_point() + ggtitle("City MPG v. Highway MPG") + geom_smooth()
 ```
 
 
@@ -204,14 +206,14 @@ mpg %>% ggplot(aes(x = hwy, y = cty, shape = mpg$drv)) + geom_point()
 
 ### geom_smooth
 ```{r}
-ggplot(data = mpg) + 
-geom_point(mapping = aes(x = displ, y = hwy))
+# ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy))
 
-ggplot(data = mpg) + 
-geom_smooth(mapping = aes(x = displ, y = hwy))
+# ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy))
 
-ggplot(data = mpg) + 
-geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+# ggplot(data = mpg) + geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+
+mpg %>% ggplot(aes(x = displ, y = hwy, linetype = drv)) + geom_point() + geom_smooth()
+
 
 ```
 
@@ -226,6 +228,9 @@ geom_smooth(mapping = aes(x = hwy, y = cty))
 ggplot(data = mpg) + 
 geom_smooth(mapping = aes(x = hwy, y = cty, linetype = drv))
 
+mpg %>% ggplot(aes(x = hwy, y = cty, linetype = drv, color=drv)) + geom_point() + geom_smooth()
+
+
 
 
 #Global aes() ... one aes that applies to all layers
@@ -234,14 +239,10 @@ geom_point() +
 geom_smooth()
 
 #Individual aes() …. an aesthetic for each layer
-ggplot(data = mpg) + 
-geom_point(mapping = aes(x = hwy, y = cty, color = class)) +
-geom_smooth(mapping = aes(x = hwy, y = cty, linetype = drv, color = drv))
+ggplot(data = mpg) + geom_point(mapping = aes(x = hwy, y = cty, color = class)) + geom_smooth(mapping = aes(x = hwy, y = cty, linetype = drv, color = drv))
 
 #Individual aes() …. an aesthetic for each layer
-ggplot(data = mpg) + 
-geom_point(mapping = aes(x = hwy, y = cty, color = class)) +
-geom_smooth(mapping = aes(x = hwy, y = cty, linetype = class, color = class)) + facet_wrap(~class)
+ggplot(data = mpg) + geom_point(mapping = aes(x = hwy, y = cty, color = class)) + geom_smooth(mapping = aes(x = hwy, y = cty, linetype = class, color = class)) + facet_wrap(~class)
 
 
 ```
