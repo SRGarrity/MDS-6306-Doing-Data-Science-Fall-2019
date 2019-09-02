@@ -17,8 +17,7 @@ system("ls")
 
 ## Load Data:
 ```{r}
-setwd("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 2/")
-playerbb = read.csv("PlayersBBall.csv", header = TRUE)
+playerbb = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 2/PlayersBBall.csv", header = TRUE)
 summary(playerbb)
 ```
 
@@ -29,7 +28,8 @@ Use the PlayerBBall.csv dataset to visually represent (summarize) the number of 
 
 ```{r}
 library(ggplot2)
-playerbb %>% ggplot(aes(x=position)) + geom_bar
+library(dplyr)
+playerbb %>% ggplot(aes(x=position)) + geom_bar() + ggtitle("Number of Players in Each Position")
 
 #mpg %>% ggplot(aes(x = class)) + geom_bar() + ggtitle("Distribution of Class")
 
