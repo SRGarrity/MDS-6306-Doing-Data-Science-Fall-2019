@@ -51,11 +51,21 @@ ggplot(player_weights, aes(x=weight)) +
 # try something different
 weight_C <- subset(playerbb, position == "C", select=c(weight,position))
 weight_F <- subset(playerbb, position == "F", select=c(weight,position))
+weights = rbind(weight_C$weight,weight_F$weight)
+
+player_weights = data.frame(weight = rbind(weight_C$weight, weight_F$weight),
+                            position = rbind(weight_C$position, weight_F$position))
+
+player_weights %>% ggplot(aes(x=weight), fill = position)
   
 
 ```
 
 
-
+```{r}
+## for height-related questions:
+temp_var <- str_split_fixed(playerbb$height,n = 2,pattern = "-")
+total_height_inches = as.numeric(temp_var[,1])+(as.numeric(temp_var[,2])/12)
+```
 
 
