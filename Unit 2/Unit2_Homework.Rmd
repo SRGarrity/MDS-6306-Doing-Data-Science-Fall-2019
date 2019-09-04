@@ -29,7 +29,10 @@ summary(playerbb)
 Use the PlayerBBall.csv dataset to visually represent (summarize) the number of players in each position.
 
 ```{r, echo=FALSE}
+test <- droplevels(playerbb)
 playerbb %>% ggplot(aes(x=position, fill=position)) + geom_bar() + ggtitle("Number of Players in Each Position")
+
+test %>% ggplot(aes(x=position, fill=position)) + geom_bar() + ggtitle("Number of Players in Each Position")
 ```
 
 ## Question 2
@@ -37,36 +40,122 @@ Use the dataset to visually investigate the distribution of the weight of center
 
 ```{r}
 # test <- playerbb %>% pull(weight)
-player_weights <- playerbb[(playerbb$position == "C" | playerbb$position == "F"),]
-
-# the next two plots are identical, however, I can't get a legend to show
-ggplot(playerbb, aes(x=weight)) +
-  geom_histogram(data=subset(playerbb, position == "F"), color = "black", fill = "blue", alpha = 0.7) +
-  geom_histogram(data=subset(playerbb, position == "C"), color = "black", fill = "red", alpha = 0.7)
-
-ggplot(player_weights, aes(x=weight)) +
-  geom_histogram(data=subset(player_weights, position == "F"), color = "black", fill = "blue", alpha = 0.7) +
-  geom_histogram(data=subset(player_weights, position == "C"), color = "black", fill = "red", alpha = 0.7)
+# player_weights <- playerbb[(playerbb$position == "C" | playerbb$position == "F"),]
+# 
+# # the next two plots are identical, however, I can't get a legend to show
+# ggplot(playerbb, aes(x=weight)) +
+#   geom_histogram(data=subset(playerbb, position == "F"), color = "black", fill = "blue", alpha = 0.7) +
+#   geom_histogram(data=subset(playerbb, position == "C"), color = "black", fill = "red", alpha = 0.7)
+# 
+# ggplot(player_weights, aes(x=weight)) +
+#   geom_histogram(data=subset(player_weights, position == "F"), color = "black", fill = "blue", alpha = 0.7) +
+#   geom_histogram(data=subset(player_weights, position == "C"), color = "black", fill = "red", alpha = 0.7)
 
 # try something different
-weight_C <- subset(playerbb, position == "C", select=c(weight,position))
-weight_F <- subset(playerbb, position == "F", select=c(weight,position))
-weights = rbind(weight_C$weight,weight_F$weight)
+weight_C <- droplevels(subset(playerbb, position == "C", select=c(weight,position)))
+weight_F <- droplevels(subset(playerbb, position == "F", select=c(weight,position)))
+weights_C_F = rbind(weight_C,weight_F)
+rm(weight_C)
+rm(weight_F)
 
-player_weights = data.frame(weight = rbind(weight_C$weight, weight_F$weight),
-                            position = rbind(weight_C$position, weight_F$position))
+# weights_C_F %>% ggplot(aes(x=weight, color=position)) +  geom_histogram()
 
-player_weights %>% ggplot(aes(x=weight), fill = position)
+
+#####
+# ggplot(weights_C_F, aes(x=weight, fill = position)) + 
+#   geom_histogram(alpha = 0.5) + 
+#   scale_fill_manual(name="position",values=c("red","darkgray"),labels=c("C","F"))
+
+ggplot(weights_C_F,aes(x=weight))+ 
+    geom_histogram(data=subset(weights_C_F,position=='C'),aes(fill=position),alpha=0.6)+
+    geom_histogram(data=subset(weights_C_F,position=='F'),aes(fill=position),alpha=0.6)+
+    scale_fill_manual(name="position", values=c("red","gray35"),labels=c("C","F"))+
+  ggtitle("Weight distribution for Centers and Forwards")+
+  xlab("weight (lbs)")
   
 
 ```
 
 # Question 3
+Use the dataset to visually investigate if the distribution of the height of centers (C) is greater than the distribution of the height of forwards (F).
+
 
 ```{r}
 ## for height-related questions:
 temp_var <- str_split_fixed(playerbb$height,n = 2,pattern = "-")
-total_height_inches = as.numeric(temp_var[,1])+(as.numeric(temp_var[,2])/12)
+playerbb$feet_height = as.numeric(temp_var[,1])+(as.numeric(temp_var[,2])/12)
+playerbb$inches_height = (as.numeric(temp_var[,1])*12)+as.numeric(temp_var[,2])
+
+ggplot(playerbb,aes(x=feet_height))+ 
+    geom_histogram(data=subset(playerbb,position=='C'),aes(fill=position),alpha=0.6)+
+    geom_histogram(data=subset(playerbb,position=='F'),aes(fill=position),alpha=0.6)+
+    scale_fill_manual(name="position", values=c("red","gray35"),labels=c("C","F"))+
+  ggtitle("Height distribution of Centers and Forwards")+
+  xlab("height (ft)")
+
 ```
+
+# Question 4
+Use the dataset to visually investigate if the distribution of height is different between any of the positions.
+
+```{r}
+
+
+```
+
+# Question 5
+Use the dataset to investigate how the player’s height is related to the player’s weight. How does height change as the weight changes?
+
+```{r}
+library(gridExtra)
+
+p1 <- ggplot(data = playerbb, mapping = aes(x=feet_height, y=weight)) +
+  geom_point() +
+  geom_smooth() +
+  xlab("height (ft)") +
+  ylab("weight (lbs)")
+
+p2 <- ggplot(data = playerbb, mapping = aes(x = feet_height, y = weight, linetype = position, color = position)) + 
+geom_point() +
+geom_smooth() +
+  xlab("height (ft)") +
+  ylab("weight (lbs)")
+
+grid.arrange(p1, p2, nrow = 1)
+```
+
+# Question 6
+Is their any difference in the relationship between height and weight between positions?  Are height and weight related differently for different positions.
+
+```{r}
+ggplot(data = playerbb) + geom_point(mapping = aes(x = feet_height, y = weight, color = position)) + geom_smooth(mapping = aes(x = feet_height, y = weight)) + facet_wrap(~position) +
+  ylab("weight (lbs)") +
+  xlab("height (ft)") +
+  ggtitle("Height v Weight by Position")
+```
+
+# Question 7
+A historian would like to investigate the claim that the heights of players have increased over the years.  Analyze this claim graphically / visually.
+
+```{r}
+# ggplot(data = playerbb) + geom_point(mapping = aes(x = year_start, y = feet_height))
+
+playerbb %>% ggplot(aes(x = factor(year_start), y = feet_height)) + geom_boxplot(color = "dodgerblue4") +
+  theme(axis.text.x = element_text(angle = 70)) +
+  ylab("height (ft)") +
+  xlab("Starting Year") +
+  ggtitle("Height by Starting Year")
+```
+
+# Question 8
+Create a 3D plot of height vs. weight vs. year and color code the points by position.
+
+```{r}
+
+```
+
+
+
+
 
 
