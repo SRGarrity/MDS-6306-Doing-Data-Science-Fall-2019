@@ -61,6 +61,7 @@ player_weights %>% ggplot(aes(x=weight), fill = position)
 
 ```
 
+# Question 3
 
 ```{r}
 ## for height-related questions:
