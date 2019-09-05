@@ -99,7 +99,8 @@ ggplot(playerbb,aes(x=feet_height))+
 Use the dataset to visually investigate if the distribution of height is different between any of the positions.
 
 ```{r}
-
+playerbb %>% ggplot(aes(x = position, y=feet_height, fill=position)) + geom_boxplot() +
+  ylab("height (ft)") + ggtitle("Height Distribution by Position")
 
 ```
 
@@ -151,10 +152,79 @@ playerbb %>% ggplot(aes(x = factor(year_start), y = feet_height)) + geom_boxplot
 Create a 3D plot of height vs. weight vs. year and color code the points by position.
 
 ```{r}
+library(ggthemes)
+library(plotly)
+
+p <- plot_ly(playerbb, x = ~feet_height, y = ~weight, z = ~year_start, color = ~position) %>%
+   add_markers() %>%
+   layout(scene = list(xaxis = list(title = 'height (ft)'),
+                      yaxis = list(title = 'weight (lbs)'),
+                      zaxis = list(title = 'starting year')))
+p
+```
+
+# Question 9
+Go to this website and use one of the 50 best plots to visualize some aspect of the data and provide at least one insight.  You will present your work in breakout! http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+
+```{r}
+#do shorter players have shorter careers than taller players
+# playerbb %>%  ggplot(aes(x=feet_height, y=(year_end-year_start))) +
+#   geom_point()
+
+# test <- droplevels(playerbb)
+
+# library(treemapify)
+# 
+# 
+# months = unique(playerbb$birth_month)
+# number_born = c()
+# 
+# for(i in 1:length(months)-1)
+# {
+#   number_born[i] = sum(with(playerbb, birth_month==months[i]))
+# }
+# hist(number_born)
+# 
+# months_filtered = months[1:12]
+# dfborn = data.frame(number = number_born, monthsdf = months_filtered)
+# 
+# 
+# 
+# 
+# dfborn$monthsR <- factor(dfborn$monthsdf, c("January","February","March","
+#                                           April","May","June","July","August","September","October","November","December"))
+# dfborn %>% ggplot(aes(x=monthsR, y=number)) + geom_bar(stat="identity") +
+#   theme(axis.text.x = element_text(angle = 70))
+# 
+# dfborn %>% ggplot(aes(area = number, fill = monthsR)) +
+#   geom_treemap() 
+
+playerbb$careerlength = playerbb$year_end - playerbb$year_start
+
+playerbb %>% ggplot(aes(x=position, y=careerlength)) +  geom_violin(color="darkgray") +  
+labs(title="Violin plot", 
+       subtitle="Career Length by Position",
+       caption="Source: Playersbball.csv",
+       x="position",
+       y="career length (years)")
 
 ```
 
+# Question 10
+Visually test the claim that the distribution of incomes increase (mean or median) as the education level rises.
 
+```{r}
+# edincome = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 2/Education_Income.csv", header = TRUE)
+# summary(edincome)
+
+edincome$EducR <- factor(edincome$Educ, c("<12","12","13-15","16",">16"))
+
+
+edincome %>% ggplot(aes(x = EducR, y = Income2005)) + geom_boxplot(color = "dodgerblue2", fill = "gray20") + ylab("Income ($)") +
+  xlab("Years of Education") +
+  ggtitle("Income by Years of Education") +
+  ylim(0,250000)
+```
 
 
 
