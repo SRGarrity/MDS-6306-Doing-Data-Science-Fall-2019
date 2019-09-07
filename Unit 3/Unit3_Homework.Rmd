@@ -16,9 +16,3 @@ article: https://newscenter.lbl.gov/2019/07/03/machine-learning-algorithms-can-u
 
 https://www.iflscience.com/technology/artificial-intelligence-set-loose-on-old-scientific-papers-discovers-something-humans-missed/
 
-# Question 1
-```{r}
-
-```
-
-
