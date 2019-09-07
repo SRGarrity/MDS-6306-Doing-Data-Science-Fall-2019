@@ -84,6 +84,7 @@ Use the dataset to visually investigate if the distribution of the height of cen
 ```{r}
 ## for height-related questions:
 temp_var <- str_split_fixed(playerbb$height,n = 2,pattern = "-")
+
 playerbb$feet_height = as.numeric(temp_var[,1])+(as.numeric(temp_var[,2])/12)
 playerbb$inches_height = (as.numeric(temp_var[,1])*12)+as.numeric(temp_var[,2])
 

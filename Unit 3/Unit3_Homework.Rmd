@@ -1,0 +1,24 @@
+---
+title: "Unit3_Homework"
+author: "Steven Garrity"
+date: "9/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# DS News of the Week
+https://www.nature.com/articles/s41586-019-1335-8
+
+article: https://newscenter.lbl.gov/2019/07/03/machine-learning-algorithms-can-uncover-hidden-scientific-knowledge/
+
+https://www.iflscience.com/technology/artificial-intelligence-set-loose-on-old-scientific-papers-discovers-something-humans-missed/
+
+# Question 1
+```{r}
+
+```
+
+
