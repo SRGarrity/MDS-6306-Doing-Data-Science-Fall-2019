@@ -3,10 +3,16 @@ title: "Unit3_Homework"
 author: "Steven Garrity"
 date: "9/7/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+#packages:
+require(tidyverse)
+require(GGally)
 ```
 
 # DS News of the Week
@@ -15,4 +21,39 @@ https://www.nature.com/articles/s41586-019-1335-8
 article: https://newscenter.lbl.gov/2019/07/03/machine-learning-algorithms-can-uncover-hidden-scientific-knowledge/
 
 https://www.iflscience.com/technology/artificial-intelligence-set-loose-on-old-scientific-papers-discovers-something-humans-missed/
+
+# Question 1
+Using the FIFA player data set, filter the data set to create a dataframe that has just the Left Midfielders (LM) and Left Forwards (LF). Use Ggally and ggpairs() and the dataset you created above above, to plot the categorical variable Position (LM and LF), versus the continuous variables Acceleration and Agility. Given the plot above, what relationships do you see?  Comment on these.
+```{r}
+# require(GGally)
+fifa = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 3/FIFA Players.csv", header = TRUE)
+# head(fifa)
+
+### look at the number of records per position from the native data:
+fifa %>% group_by(Position) %>% summarize(count = n()) %>% print(n=30)
+
+### create new data frame that only contains filtered data:
+q1_fifa <- fifa %>%
+filter(Position == "LM" | Position == "LF") %>%
+select(Acceleration, Agility, Position) 
+
+###clean up the position factor
+q1_fifa$posFact = factor(q1_fifa$Position, levels=c("LF","LM"))
+
+### sanity check...make sure we have the data that we think we do:
+q1_fifa %>% group_by(posFact) %>% summarize(count = n())
+
+### EDA plotting of the data:
+# q1_fifa$posFact <- factor(q1_fifa$posFact, levels=rev(levels(q1_fifa$posFact)))
+q1_fifa %>% select(Acceleration, Agility, posFact) %>% ggpairs(aes(color=posFact, alpha=0.2)) + ggtitle("LM vs LF EDA")
+```
+
+# Question 2
+Your client would like to formally test if the mean agility rating of left midfielders is different than that of the left forwards.  Perform a 6 – step t-test to test for the difference in these means.  (You may skip step 2 (draw and shade) if you like.  If you are unfamiliar with the 6-step hypothesis test, see Stat 1 slides or the Bridge Course to review the 6-step hypothesis test.)
+```{r}
+
+```
+
+# Takeaways & Questions
+I'm confused by the factor vs. arrange. Especially why we had to be explicit for the graph to turn out as desired. When we created the data frame with "arrange" it seemed to be ordered correctly, but the plot didn't show as intended. It wasn't until we invoked "order" that things worked as expected.
 
