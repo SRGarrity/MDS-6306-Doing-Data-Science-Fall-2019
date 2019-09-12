@@ -20,8 +20,6 @@ https://www.nature.com/articles/s41586-019-1335-8
 
 article: https://newscenter.lbl.gov/2019/07/03/machine-learning-algorithms-can-uncover-hidden-scientific-knowledge/
 
-https://www.iflscience.com/technology/artificial-intelligence-set-loose-on-old-scientific-papers-discovers-something-humans-missed/
-
 # Part 1A
 Using the FIFA player data set, filter the data set to create a dataframe that has just the Left Midfielders (LM) and Left Forwards (LF). Use Ggally and ggpairs() and the dataset you created above above, to plot the categorical variable Position (LM and LF), versus the continuous variables Acceleration and Agility. Given the plot above, what relationships do you see?  Comment on these.
 ```{r}
