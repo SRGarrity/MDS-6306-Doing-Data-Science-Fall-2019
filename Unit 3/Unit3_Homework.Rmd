@@ -150,15 +150,19 @@ q2_fifa %>% select(mental, technical, physical, ratingClass, ageClass, posFact) 
 
 
 #### Look at linear correlations
-q2_fifa %>% ggplot(aes(x=physical, y=rating, color=posFact)) + geom_point() +
+library(gridExtra)
+
+p1 <- q2_fifa %>% ggplot(aes(x=physical, y=rating, color=posFact)) + geom_point(size=0.5, alpha=0.5) +
   geom_smooth(method="lm", se=FALSE) +
   labs(x="Physical Rating", y="Overall Player Rating")
-q2_fifa %>% ggplot(aes(x=technical, y=rating, color=posFact)) + geom_point() +
+p2 <- q2_fifa %>% ggplot(aes(x=technical, y=rating, color=posFact)) + geom_point(size=0.5, alpha=0.5) +
    geom_smooth(method="lm", se=FALSE) +
   labs(x="Technical Rating", y="Overall Player Rating")
-q2_fifa %>% ggplot(aes(x=mental, y=rating, color=posFact)) + geom_point() +
+p3 <- q2_fifa %>% ggplot(aes(x=mental, y=rating, color=posFact)) + geom_point(size=0.5, alpha=0.5) +
    geom_smooth(method="lm", se=FALSE) +
   labs(x="Mental Rating", y="Overall Player Rating")
+
+grid.arrange(p1, p2, p3, ncol = 1)
 ```
 
 # Takeaways & Questions
