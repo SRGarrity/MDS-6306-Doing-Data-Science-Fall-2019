@@ -30,7 +30,7 @@ fifa = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/U
 # head(fifa)
 
 ### look at the number of records per position from the native data:
-fifa %>% group_by(Position) %>% summarize(count = n()) %>% print(n=30)
+fifa %>% group_by(Position) %>% summarize(count = n()) %>% arrange(count) %>% print(n=30)
 
 ### create new data frame that only contains filtered data:
 q1_fifa <- fifa %>%
@@ -117,6 +117,48 @@ fifa %>% filter(Position == "LM" | Position == "LF") %>%
   stat_qq() + stat_qq_line() +
   facet_wrap(~Position)
   labs(title="QQ Plots: LM vs. LF")
+```
+
+# Part 2
+```{r}
+fifa %>% group_by(Position) %>% summarize(count = n()) %>% arrange(count) %>% print(n=30)
+# we are only looking at the Striker position, so create new data frame
+q2_fifa <- fifa %>% filter(Position == "CF" | Position == "CM" | Position == "CB")
+q2_fifa$posFact = factor(q2_fifa$Position, levels=c("CF","CM","CB"))
+# q2_fifa <- fifa %>% filter(Position == "CAM" | Position == "CDM")
+# q2_fifa$posFact = factor(q2_fifa$Position, levels=c("CAM","CDM"))
+
+mental_names <- c("Positioning","Vision","Composure","Interceptions","Aggression")
+technical_names <- c("Finishing","LongShots","Penalties","ShotPower","Volleys",
+                     "Crossing","Curve","FKAccuracy","LongPassing","ShortPassing",
+                     "BallControl","Dribbling","HeadingAccuracy","Marking",
+                     "SlidingTackle","StandingTackle")
+physical_names <- c("Acceleration","SprintSpeed","Agility","Balance","Reactions",
+                    "Jumping","Stamina","Strength")
+q2_fifa$mental <- rowMeans(q2_fifa[,mental_names], na.rm=TRUE)
+q2_fifa$technical <- rowMeans(q2_fifa[,technical_names], na.rm=TRUE)
+q2_fifa$physical <- rowMeans(q2_fifa[,physical_names], na.rm=TRUE)
+
+# convert rating to numeric and then to factor
+q2_fifa$rating <- as.numeric(q2_fifa$ST)
+q2_fifa$ratingClass = cut(q2_fifa$rating, breaks = c(0,40,60,100), labels = c("Low","Medium","High"))
+
+q2_fifa$ageClass = cut(q2_fifa$Age, breaks = c(0,21,27,33,39), 
+                       labels = c("Y","YM","MO","O"))
+
+q2_fifa %>% select(mental, technical, physical, ratingClass, ageClass, posFact) %>%  ggpairs(aes(color=posFact, alpha=0.5))
+
+
+#### Look at linear correlations
+q2_fifa %>% ggplot(aes(x=physical, y=rating, color=posFact)) + geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(x="Physical Rating", y="Overall Player Rating")
+q2_fifa %>% ggplot(aes(x=technical, y=rating, color=posFact)) + geom_point() +
+   geom_smooth(method="lm", se=FALSE) +
+  labs(x="Technical Rating", y="Overall Player Rating")
+q2_fifa %>% ggplot(aes(x=mental, y=rating, color=posFact)) + geom_point() +
+   geom_smooth(method="lm", se=FALSE) +
+  labs(x="Mental Rating", y="Overall Player Rating")
 ```
 
 # Takeaways & Questions
