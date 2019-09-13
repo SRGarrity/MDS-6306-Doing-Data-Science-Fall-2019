@@ -120,11 +120,10 @@ fifa %>% filter(Position == "LM" | Position == "LF") %>%
 # Part 2
 ```{r}
 fifa %>% group_by(Position) %>% summarize(count = n()) %>% arrange(count) %>% print(n=30)
-# we are only looking at the Striker position, so create new data frame
+
+# we are only looking at the CF, CM, and CB positions so create a new data frame.
 q2_fifa <- fifa %>% filter(Position == "CF" | Position == "CM" | Position == "CB")
 q2_fifa$posFact = factor(q2_fifa$Position, levels=c("CF","CM","CB"))
-# q2_fifa <- fifa %>% filter(Position == "CAM" | Position == "CDM")
-# q2_fifa$posFact = factor(q2_fifa$Position, levels=c("CAM","CDM"))
 
 mental_names <- c("Positioning","Vision","Composure","Interceptions","Aggression")
 technical_names <- c("Finishing","LongShots","Penalties","ShotPower","Volleys",
@@ -138,8 +137,8 @@ q2_fifa$technical <- rowMeans(q2_fifa[,technical_names], na.rm=TRUE)
 q2_fifa$physical <- rowMeans(q2_fifa[,physical_names], na.rm=TRUE)
 
 # convert rating to numeric and then to factor
-q2_fifa$rating <- as.numeric(q2_fifa$ST)
-q2_fifa$ratingClass = cut(q2_fifa$rating, breaks = c(0,40,60,100), labels = c("Low","Medium","High"))
+q2_fifa$rating <- as.numeric(q2_fifa$Overall)
+q2_fifa$ratingClass = cut(q2_fifa$rating, breaks = c(0,55,75,100), labels = c("Low","Medium","High"))
 
 q2_fifa$ageClass = cut(q2_fifa$Age, breaks = c(0,21,27,33,39), 
                        labels = c("Y","YM","MO","O"))
