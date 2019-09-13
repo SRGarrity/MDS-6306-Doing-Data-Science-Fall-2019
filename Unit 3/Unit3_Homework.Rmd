@@ -33,7 +33,7 @@ fifa %>% group_by(Position) %>% summarize(count = n()) %>% arrange(count) %>% pr
 ### create new data frame that only contains filtered data:
 q1_fifa <- fifa %>%
 filter(Position == "LM" | Position == "LF") %>%
-select(Acceleration, Agility, Position) 
+select(Agility, Acceleration, Position) 
 
 ###clean up the position factor
 q1_fifa$posFact = factor(q1_fifa$Position, levels=c("LF","LM"))
@@ -43,7 +43,7 @@ q1_fifa %>% group_by(posFact) %>% summarize(count = n())
 
 ### EDA plotting of the data:
 # q1_fifa$posFact <- factor(q1_fifa$posFact, levels=rev(levels(q1_fifa$posFact)))
-q1_fifa %>% select(Acceleration, Agility, posFact) %>% ggpairs(aes(color=posFact, alpha=0.2)) + ggtitle("LM vs LF EDA")
+q1_fifa %>% select(Agility, Acceleration, posFact) %>% ggpairs(aes(color=posFact, alpha=0.2)) + ggtitle("LM vs LF EDA")
 ```
 
 # Part2B
