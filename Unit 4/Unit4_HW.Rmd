@@ -3,28 +3,63 @@ title: "DDS HW4"
 author: "Steven Garrity"
 date: "9/15/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+library(XML)
+library(tidyverse)
+library(ggplot2)
 ```
 
-## Including Plots
+# Part 1
+```{r}
+sushi <- read_html("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml")
+sushi_nameR <- html_nodes(sushi,"name")
+sushi_name <- stri_sub(sushi_nameR,7,-8)
+sushi_zipcodeR <- html_nodes(sushi, "zipcode")
+sushi_zipcode <- stri_sub(sushi_zipcodeR,10,-11)
+sushi_councilR <- html_nodes(sushi, "councildistrict")
+sushi_council <- stri_sub(sushi_councilR,18,-19)
 
-You can also embed plots, for example:
+df_sushi <- data.frame(name = sushi_name, zipcode = sushi_zipcode, council=sushi_council)
+str(df_sushi)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+grep("sushi", ignore.case = TRUE, df_sushi$name)
+length(grep("sushi", ignore.case = TRUE, df_sushi$name))
+# grepl("sushi", ignore.case = TRUE, df_sushi$name)
+# sum(grepl("sushi", ignore.case = TRUE, df_sushi$name))
+
+
+#### How many sushi restaurants downtown:
+df_sushi_11 <- df_sushi %>% filter(council == 11)
+length(grep("sushi", ignore.case = TRUE, df_sushi_11$name))
+df_sushi_11[grep("sushi", ignore.case = TRUE, df_sushi_11$name),]
+
+sushi_by_council <- df_sushi[grep("sushi", ignore.case = TRUE, df_sushi$name),]
+
+#### How many sushi restaurants in each council:
+sushi_by_council_summarize <- sushi_by_council %>% group_by(council) %>% summarize(count = n())
+
+sushi_by_council_summarize$council =
+  factor(sushi_by_council_summarize$council,
+         level = sushi_by_council_summarize$council[order(as.numeric(as.character(sushi_by_council_summarize$council)))])
+
+sushi_by_council_summarize %>% ggplot(aes(x = council, y = count)) + geom_col() +
+  labs(title="Number of Sushi Restaurants by Council District in Baltimore, MD", y="Number of Restaurants", x ="Council")
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Part 2
+```{r}
+
+
+
+
+
+
+```
