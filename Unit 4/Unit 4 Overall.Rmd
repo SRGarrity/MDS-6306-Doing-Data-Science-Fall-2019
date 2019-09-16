@@ -3,6 +3,8 @@ title: "Unit 4 Overall"
 author: "Bivin"
 date: "5/1/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -90,7 +92,7 @@ data_long %>% ggplot(aes(x = age, y = measurement, color = condition )) + geom_p
 data_long %>% group_by(condition) %>% summarize(meanAge = mean(as.numeric(age)))
 
 #filtering
-data_long %>% filter(condition = "Control") %>% ggplot(aes(x = age, y = measurement)) + geom_point()
+data_long %>% filter(condition == "Control") %>% ggplot(aes(x = age, y = measurement)) + geom_point()
 
 
 
@@ -214,15 +216,27 @@ get_prices_df %>% ggplot(aes(x = date, y = adj_volume))+ geom_col() + ggtitle("A
 
 
 #twitteR
+library(rtweet)
 
-api_key = "rkclWXRZYkZYZbdVdcvzP2ZcN "
-api_secret = "ymjMYAkXhXVAL2ci4vTKi3ZFKg72abSKlzBNZq0y6rkXXltsdY"
-access_token = "1105487041691815937-IIPDKMmlfGIuRvJgrRfCgiRLtQAfII"
-access_token_secret = "mafeLvPRrI8SKBvyq4SJVozfx2wDD0rRkOrASfCoRJUyy"
+api_key = "Ucpu8oDQ9gnJ2zoaBd6jgxkUH"
+api_secret_key = "QtDJMK6Ntd5gWZJoTS0KsPuDTLskrEikckVAxMc4rfFscMzLE7"
+access_token = "1537522508-6jpKETNAkJSeuFwI7eJbwlPBiScDJyi9yDb7gdM"
+access_token_secret = "Is5VnXMKZbUGREmpry5xGWlm5JNoaB2kqi7RVSW5CX1oH"
+
+## authenticate via web browser
+token <- create_token(
+  app = "MSDS_DDS",
+  consumer_key = api_key,
+  consumer_secret = api_secret_key,
+  access_token = access_token,
+  access_secret = access_token_secret)
+
+tweets = search_tweets("trump", n=10, include_rts = FALSE)
 
 #Load twitteR
-library(twitteR)
-setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
+# install.package("twitteR")
+# library(twitteR)
+# setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
   
 #Get tweets
 tweets = searchTwitter("$appl", n = 10, lang = "en")
@@ -288,3 +302,4 @@ ggplot(dat, aes(x = year, y = NY.GDP.PCAP.KD, color=country)) + geom_line() +
   xlab('Year') + ylab('GDP per capita')
 
 ```
+
