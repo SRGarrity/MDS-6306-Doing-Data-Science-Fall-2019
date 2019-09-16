@@ -217,6 +217,14 @@ get_prices_df %>% ggplot(aes(x = date, y = adj_volume))+ geom_col() + ggtitle("A
 
 #twitteR
 library(rtweet)
+is_tweet_length <- function(.x, n = 280) {
+   .x <- gsub("https?://[[:graph:]]+\\s?", "", .x)
+   while (grepl("^@\\S+\\s+", .x)) {
+      .x <- sub("^@\\S+\\s+", "", .x)
+   }
+   !(nchar(.x) <= n)   # here's the fix
+}
+assignInNamespace("is_tweet_length", is_tweet_length, ns = "rtweet")
 
 api_key = "Ucpu8oDQ9gnJ2zoaBd6jgxkUH"
 api_secret_key = "QtDJMK6Ntd5gWZJoTS0KsPuDTLskrEikckVAxMc4rfFscMzLE7"
@@ -231,7 +239,26 @@ token <- create_token(
   access_token = access_token,
   access_secret = access_token_secret)
 
-tweets = search_tweets("trump", n=10, include_rts = FALSE)
+tweets = search_tweets("datascience", n=1000, include_rts = FALSE)
+
+sf_trends <- get_trends("san francisco")
+
+post_tweet("my first tweet using the #R rtweet package")
+
+## plot time series of tweets
+ts_plot(tweets, "2 hours") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) +
+  ggplot2::labs(
+    x = NULL, y = NULL,
+    title = "Frequency of Twitter #datascience hashtags",
+    subtitle = "Tweet counts aggregated using three-hour intervals",
+    caption = "\nSource: Data collected from Twitter's REST API via rtweet"
+  )
+
+
+
+###########################################################
 
 #Load twitteR
 # install.package("twitteR")
