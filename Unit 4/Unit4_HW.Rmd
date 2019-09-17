@@ -56,9 +56,31 @@ sushi_by_council_summarize %>% ggplot(aes(x = council, y = count)) + geom_col() 
 
 # Part 2
 ```{r}
+library(tidyverse)
+library(openair)
+kc1 <- importAURN(site= "kc1", year = 2018:2019)
+head(kc1)
+tail(kc1)
+plot(kc1$nox, kc1$so2)
+aurn <- importMeta(source = "aurn")
 
+aurn_detailed <- importMeta(source = "aurn", all = TRUE)
 
+no2_sites <- filter(
+  aurn_detailed,
+  parameter == "NO2",
+  site.type == "Urban Traffic"
+)
 
+nrow(no2_sites)
+
+require(leaflet)
+
+m <- leaflet() %>%
+  addTiles() %>% # default OpenStreetMap map tiles
+  addMarkers(lng=c(-116.989,-117.0018), lat=c(46.7397, 46.7305), popup = c("Garrity Household", "Ampersand 1"))
+
+m
 
 
 
