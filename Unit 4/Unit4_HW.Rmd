@@ -56,32 +56,46 @@ sushi_by_council_summarize %>% ggplot(aes(x = council, y = count)) + geom_col() 
 
 # Part 2
 ```{r}
-library(tidyverse)
-library(openair)
-kc1 <- importAURN(site= "kc1", year = 2018:2019)
-head(kc1)
-tail(kc1)
-plot(kc1$nox, kc1$so2)
-aurn <- importMeta(source = "aurn")
+# library(openair)
 
+# aurn <- importMeta(source = "aurn")
 aurn_detailed <- importMeta(source = "aurn", all = TRUE)
 
-no2_sites <- filter(
-  aurn_detailed,
-  parameter == "NO2",
-  site.type == "Urban Traffic"
-)
-
-nrow(no2_sites)
-
-require(leaflet)
+# require(leaflet)
 
 m <- leaflet() %>%
   addTiles() %>% # default OpenStreetMap map tiles
-  addMarkers(lng=c(-116.989,-117.0018), lat=c(46.7397, 46.7305), popup = c("Garrity Household", "Ampersand 1"))
+  # addMarkers(lng=aurn_detailed$longitude, lat=aurn_detailed$latitude, popup = aurn_detailed$code)
+addCircleMarkers(lng=aurn_detailed$longitude, lat=aurn_detailed$latitude,
+    radius = 6,
+    color = "green",
+    stroke = FALSE, fillOpacity = 0.5,
+    popup = aurn_detailed$code)
 
 m
 
+# list all parameters
+str(aurn_detailed$parameter)
 
+urban_background_sites <- filter(aurn_detailed, site.type == "Urban Background")
+nrow(urban_background_sites)
+
+rural_background_sites <- filter(aurn_detailed, site.type == "Rural Background")
+nrow(rural_background_sites)
+
+
+roch <- importAURN(site= "roch", year = 2018)
+str(roch)
+bel2 <- importAURN(site = "bel2", year = 2018)
+str(roch)
+
+# require(plyr)
+alldata = rbind.fill(bel2,roch)
+head(alldata)
+tail(alldata)
+```
+
+# EDA - Step 2
+```{r}
 
 ```
