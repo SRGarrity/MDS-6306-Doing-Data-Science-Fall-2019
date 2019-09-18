@@ -119,5 +119,11 @@ windRose(my1, type = "season", pollutant = "nox", cols="heat", width=0.5, offset
 windRose(chbo, type = "season", pollutant = "nox", cols="heat", width=0.5, offset=15)
 ```
 
+# EDA - calendar plots
+```{r}
+calendarPlot(chbo, pollutant = "o3", annotate = "value", lim =90,
+cols = "Purples", col.lim = c("black", "orange"),
+layout = c(4, 3))
+```
 
 
