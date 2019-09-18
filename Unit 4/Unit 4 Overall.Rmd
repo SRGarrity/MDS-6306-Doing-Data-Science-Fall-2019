@@ -182,13 +182,16 @@ who %>%
 #Intrinio
 
 # Andrew Carpenter helpful link: http://old.r-fiddle.org/#/fiddle?id=n1shL0IB&version=1
-#Show access through URL: https://api-v2.intrinio.com/companies/AAPL?api_key=OmIxMWI5NWY3MzM0ZjdmN2U3ODJlOTBhNmU3OGQ0Zjlk
+#Show access through URL: https://api-v2.intrinio.com/companies/AAPL?api_key=Ojg4MmQ5MzBhMjM5OTIzZTYwYjE4YWM5NmY5MTAzOGVk
+
+# Username: 3247a14753b61a7772b74a5dc5f74b06
+# Password: d4705fa27c2a05e9b9870d98ae057325 
 
 library(httr)
 library(jsonlite)
 
-username = "cc092ea39fffe74b69f12976f4bfcd22"
-password = "7a8adcf931edb0766ff36fbb0b5cc421"
+username = "3247a14753b61a7772b74a5dc5f74b06"
+password = "d4705fa27c2a05e9b9870d98ae057325"
 
 base <- "https://api.intrinio.com/"
 endpoint <- "prices"
@@ -212,10 +215,11 @@ par(mfrow = c(2,1))
 
 get_prices_df %>% ggplot(aes(x = date, y = adj_close))+ geom_line() + ggtitle("Adjusted Close")
 get_prices_df %>% ggplot(aes(x = date, y = adj_volume))+ geom_col() + ggtitle("Adjusted Volume")
+```
 
-
-
-#twitteR
+#Twittter API
+```{r}
+#twitteR # didn't work for me, so using the "rtweet" package instead
 library(rtweet)
 is_tweet_length <- function(.x, n = 280) {
    .x <- gsub("https?://[[:graph:]]+\\s?", "", .x)
@@ -291,6 +295,7 @@ DallasTrends[1:10,]
 #Useful URL in explainging WDI XML and JSON data formats.
 #https://datahelpdesk.worldbank.org/knowledgebase/articles/898599-indicator-api-queries
 
+library(WDI)
 #Goal 1: Create a bar chart of topics relating to gdp.
 
 #search for reports with "gdp" in the description
