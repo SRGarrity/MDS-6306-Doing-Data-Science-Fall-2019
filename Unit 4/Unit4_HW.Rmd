@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(XML)
 library(tidyverse)
 library(ggplot2)
+library(GGally)
 ```
 
 # Part 1
@@ -56,46 +57,67 @@ sushi_by_council_summarize %>% ggplot(aes(x = council, y = count)) + geom_col() 
 
 # Part 2
 ```{r}
-# library(openair)
-
-# aurn <- importMeta(source = "aurn")
+library(openair)
+#load metadata for all sites:
 aurn_detailed <- importMeta(source = "aurn", all = TRUE)
 
-# require(leaflet)
+library(leaflet)
 
 m <- leaflet() %>%
-  addTiles() %>% # default OpenStreetMap map tiles
+  addProviderTiles(providers$NASAGIBS.ViirsEarthAtNight2012) %>% # default OpenStreetMap map tiles
   # addMarkers(lng=aurn_detailed$longitude, lat=aurn_detailed$latitude, popup = aurn_detailed$code)
-addCircleMarkers(lng=aurn_detailed$longitude, lat=aurn_detailed$latitude,
-    radius = 6,
-    color = "green",
-    stroke = FALSE, fillOpacity = 0.5,
-    popup = aurn_detailed$code)
+addCircleMarkers(lng=aurn_detailed$longitude[aurn_detailed$code == "CHBO" | aurn_detailed$code == "MY1"], lat=aurn_detailed$latitude[aurn_detailed$code == "CHBO" | aurn_detailed$code == "MY1"],
+    radius = 10,
+    color = "red",
+    stroke = FALSE, fillOpacity = 0.2,
+    popup = aurn_detailed$code[aurn_detailed$code == "CHBO" | aurn_detailed$code == "MY1"])
 
 m
+
+m2 <- leaflet() %>%
+  addProviderTiles(providers$Wikimedia) %>%
+  addCircleMarkers(lng=aurn_detailed$longitude, lat=aurn_detailed$latitude, radius = 6, color = "navy", stroke = FALSE, fillOpacity = 0.2, popup = aurn_detailed$code) %>%
+  addCircleMarkers(lng=aurn_detailed$longitude[aurn_detailed$code == "CHBO" | aurn_detailed$code == "MY1"], lat=aurn_detailed$latitude[aurn_detailed$code == "CHBO" |aurn_detailed$code == "MY1"],    radius = 6, color = "red", stroke = FALSE, fillOpacity = 0.5, popup = aurn_detailed$code[aurn_detailed$code == "CHBO" | aurn_detailed$code == "MY1"])
+
+m2
+  
 
 # list all parameters
 str(aurn_detailed$parameter)
 
+# list all urban sites
 urban_background_sites <- filter(aurn_detailed, site.type == "Urban Background")
 nrow(urban_background_sites)
 
+# list all rural sites
 rural_background_sites <- filter(aurn_detailed, site.type == "Rural Background")
 nrow(rural_background_sites)
 
 
-roch <- importAURN(site= "roch", year = 2018)
-str(roch)
-bel2 <- importAURN(site = "bel2", year = 2018)
-str(roch)
+chbo <- importAURN(site= "CHBO", year = 2018)
+str(chbo)
+my1 <- importAURN(site = "MY1", year = 2018)
+str(my1)
 
 # require(plyr)
-alldata = rbind.fill(bel2,roch)
+alldata = rbind.fill(my1,chbo)
 head(alldata)
 tail(alldata)
+
+# alldata$rating <- as.numeric(q2_fifa$Overall)
+alldata$windCardinal = cut(alldata$wd, breaks = c(0,90,180,270,360), labels = c("NE","SE","SW","NW"))
 ```
 
 # EDA - Step 2
 ```{r}
-
+alldata %>% select(o3, so2, pm2.5, windCardinal) %>% ggpairs(aes(color=alldata$code, alpha=0.2)) + ggtitle("Urban vs Rural Air Pollutants")
 ```
+
+# EDA - Windroses
+```{r}
+windRose(my1, type = "season", pollutant = "nox", cols="heat", width=0.5, offset=15)
+windRose(chbo, type = "season", pollutant = "nox", cols="heat", width=0.5, offset=15)
+```
+
+
+
