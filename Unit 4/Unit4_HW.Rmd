@@ -15,13 +15,25 @@ library(XML)
 library(tidyverse)
 library(ggplot2)
 library(GGally)
+library(rvest) #html_table, html_node
+library(dplyr)
+library(tidyr)
+library(stringi)
+library(rvest) #html_table, html_node
+library(ggplot2)
+library(RCurl) #getURL
 ```
 
 # Part 1
 ```{r}
+
+x_name <- html_nodes(xml_file,"name") %>% html_text() 
+
+
 sushi <- read_html("https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml")
-sushi_nameR <- html_nodes(sushi,"name")
-sushi_name <- stri_sub(sushi_nameR,7,-8)
+sushi_name <- html_nodes(sushi,"name") %>% html_text() # this is way better, no need to strip beginning and end like I do below!!!
+
+# sushi_name <- stri_sub(sushi_nameR,7,-8)
 sushi_zipcodeR <- html_nodes(sushi, "zipcode")
 sushi_zipcode <- stri_sub(sushi_zipcodeR,10,-11)
 sushi_councilR <- html_nodes(sushi, "councildistrict")
@@ -115,7 +127,7 @@ alldata %>% select(o3, so2, pm2.5, windCardinal) %>% ggpairs(aes(color=alldata$c
 
 # EDA - Windroses
 ```{r}
-windRose(my1, type = "season", pollutant = "nox", cols="heat", width=0.5, offset=15)
+windRose(my1, type = "season", pollutant = "nox", cols="heat", width=0.5, offset=15, min.bin = 0.1)
 windRose(chbo, type = "season", pollutant = "nox", cols="heat", width=0.5, offset=15)
 ```
 
@@ -126,4 +138,22 @@ cols = "Purples", col.lim = c("black", "orange"),
 layout = c(4, 3))
 ```
 
+```{r}
+#random selection...mostly for shits & giggles
+x = c("Heads","Tails")
+sample(x,1)
+```
+
+```{r}
+x = c("SAM","S","A","M","s","a","m")
+length(x)
+
+grep("SAM",x, ignore.case = TRUE)
+
+grep("[SAM]",x)
+
+grep("[SAM]",x, ignore.case=TRUE)
+
+
+```
 
