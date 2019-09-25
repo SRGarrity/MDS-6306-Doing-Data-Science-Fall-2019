@@ -3,6 +3,8 @@ title: "Unit 5 Overall"
 author: "Bivin"
 date: "5/2/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -102,6 +104,7 @@ GDPPC = WDI(indicator="NY.GDP.PCAP.KD", start=2015, end=2015)
 head(GDPPC)
 
 library(WHO)
+library(tidyverse)
 codes <- get_codes()
 str(codes)
 dim(codes)
@@ -176,12 +179,12 @@ string5 = " \"I've missed more than 9000 shots in my career. I've lost almost 30
 
 str_view(string5, "shot") 
 str_view_all(string5,"shot")
-str_view_all(string5,"shot\\.")
+str_view_all(string5,"shot\\.") # wildcard
 str_view_all(string5,"\\bshot\\b") #Important
 str_view_all(string5,"I")
 str_view_all(string5," I ")
 str_view_all(string5,"\\. I") #Find "I" at the beginning of a sentence. 
-str_view_all(string5,"(\\. I| \"I)")
+str_view_all(string5,"(\\. I| \"I)") # grouping with parentheses to accomodate "or"
 #How can we count how many times it comes up in the string?  The answer is coming.
 
 
@@ -192,14 +195,14 @@ str_view(string2, "do\\.") # need \\. because \ is an escape in both strings and
 ##Anchors
 ```{r}
 string6 = " \"Sometimes when you innovate, you make mistakes. It is best to admit them quickly, and get on with improving your other innovations.\" - Steve Jobs"
-str_view(string1, "^Don't")
+str_view(string1, "^Don't") #^ looks at beginning of the string
 str_view(string1, "^interfere")
 str_view(string3, "^T")
 str_view(string6, "^\"Some") #Why Nothing ... we will come back to this.
-str_view(string6, "Jobs$")
+str_view(string6, "Jobs$") #$ looks at end of the string
 
 #Find digits and whitespace
-str_view(string5,"\\d")
+str_view(string5,"\\d") # looks for a digit
 str_view_all(string5,"\\d")
 str_view_all(string6,"\\s") #Ahh... there was white space
 str_view(string6, "^ \"Some") 
@@ -220,7 +223,7 @@ df = data.frame(quotes = c(string2,string4,string5,string6), stringsAsFactors = 
 df$quotes
 str_view(df$quotes,"(Steve|Jobs)")
 str_view_all(df$quotes,"[abc]")
-str_view_all(df$quotes,"[^abc]")
+str_view_all(df$quotes,"[^abc]") # anything NOT abc
 ```
 
 ## Repitition
@@ -230,6 +233,7 @@ str_view_all(df$quotes,"[^abc]")
 # *: 0 or more
 
 str_view(df$quotes, "0+") #Greedy
+str_view_all(df$quotes, "0+")
 str_view(df$quotes, "[sn]+") #Greedy
 str_view_all(df$quotes, "[sn]+")
 
@@ -308,7 +312,7 @@ df %>% filter(str_detect(quotes,"John Wooden"))
 colors = c("orange","blue","yellow","green","purple","brown","red")
 color_expression = str_c(colors, collapse = "|")
 color_expression
-has_color = str_subset(sentences,color_expression)
+has_color = str_subset(sentences,color_expression) # filtering based on the variable color_expression
 has_color
 matches = str_extract(has_color,color_expression)
 matches
@@ -401,6 +405,7 @@ unlist(str_split(s1,boundary("word")))
 s2 = "I like chocolate. It is my favorite."
 str_split(s2," ")
 str_split(s2,boundary("word"))
+unlist(str_split(s2,boundary("word")))
 ```
 
 #regex()
@@ -446,12 +451,12 @@ library(jsonlite)
 library(dplyr)
 library(tidyverse)
 
-NYTIMES_KEY = "OG89fUubcS8FXofVrLA4dmIOHh5omiFa" #Your Key Here … get from NTY API website
+NYTIMES_KEY = "rCMGPuQRWtKSG83NavoMJUzxESf0gCln" #Your Key Here … get from NTY API website
 
 # Let's set some parameters
-term <- "Central+Park+Jogger" # Need to use + to string together separate words
-begin_date <- "19890419"
-end_date <- "19910419"
+term <- "Data+Science" # Need to use + to string together separate words
+begin_date <- "20190419"
+end_date <- "20190619"
 
 baseurl <- paste0("http://api.nytimes.com/svc/search/v2/articlesearch.json?q=",term,
                   "&begin_date=",begin_date,"&end_date=",end_date,
@@ -506,7 +511,7 @@ allNYTSearch[!is.na(allNYTSearch$NewsOrOther),] %>%
 #Artilce 9 is "News"
 #Artilce 44 is "Other"
 
-ArticleToClassify = allNYTSearch[4,] # Check out 4, 9 and 44
+ArticleToClassify = allNYTSearch[22,] # Check out 4, 9 and 44
 ArticleToClassify$response.docs.headline.main
 
 trueType = ArticleToClassify$NewsOrOther[1]
@@ -536,8 +541,8 @@ importantWords
 newsArticles = allNYTSearch %>% filter(NewsOrOther == "News")
 otherArticles = allNYTSearch %>% filter(NewsOrOther == "Other")
 
-numNewsArticles = dim(newsArticles)[1]
-numOtherArticles = dim(otherArticles)[1]
+numNewsArticles = dim(newsArticles)[1] #number of rows
+numOtherArticles = dim(otherArticles)[1] #number of rows
 
 numNewsArticles
 numOtherArticles
@@ -585,7 +590,7 @@ articleStats
 #Tidy and Plot
 articleStats[,c(2,3)] %>% gather(Type,Percent) %>% mutate(Word = rep(articleStats$Word,2)) %>% ggplot(aes(y = Percent, x = Type, fill = Word)) + geom_col()
 
-articleStats[,c(2,3)] %>% gather(Type,Percent) %>% mutate(Word = rep(articleStats$Word,2)) %>% ggplot(aes(y = Percent, x = Type, fill = Word)) + geom_col() + facet_wrap(~Word)
+articleStats[,c(2,3)] %>% gather(Type,Percent) %>% mutate(Word = rep(articleStats$Word,2)) %>% ggplot(aes(y = Percent, x = Type, fill = Word)) + geom_col() + facet_grid(~Word)
 ```
 
 
