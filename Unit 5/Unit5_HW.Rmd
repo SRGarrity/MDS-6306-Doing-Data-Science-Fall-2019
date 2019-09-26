@@ -3,10 +3,13 @@ title: "Unit5_HW"
 author: "Steven Garrity"
 date: "9/24/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
 ```
 
 ## From asynch:
@@ -18,22 +21,141 @@ color_expression = str_c(colors, collapse = "|")
 color_expression
 has_color = str_subset(sentences,color_expression) # filtering based on the variable color_expression
 has_color
+has_color <- has_color[-c(41,43)]
+matches = str_extract(has_color,color_expression)
+matches
+matches_all = str_extract_all(has_color,color_expression, simplify = TRUE)
+matches_all
+class(matches_all)
+matches_all = unlist(str_extract_all(has_color,color_expression))
+matches_all
+matchDF = data.frame(Colors = matches_all)
+matchDF %>% ggplot(aes(x = Colors, fill = Colors)) + geom_bar()+ scale_fill_manual(values=colors[order(colors)])
 ```
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# Part 1 - BBALL
+```{r}
+playerbb = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 2/PlayersBBall.csv", header = TRUE)
+# levels(playerbb$position) = droplevels(playerbb$position,"")
 
-```{r cars}
-summary(cars)
+temp_var <- str_split_fixed(playerbb$height, n = 2, pattern = "-")
+
+playerbb$inches_height = (as.numeric(temp_var[,1])*12)+as.numeric(temp_var[,2])
+
+ggplot(playerbb,aes(x=inches_height, fill = position))+ 
+    geom_histogram() +
+  facet_wrap(~position)
 ```
 
-## Including Plots
+# Part 2 - FIFA
+```{r}
+fifa = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 3/FIFA Players.csv", header = TRUE)
+str(fifa)
 
-You can also embed plots, for example:
+# levels(fifa$Height) = droplevels(fifa$Height,"") # this keeps fucking me up, why?
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+fifa_sh <- fifa %>% separate(Height,into = c("Feet", "Inches"), sep = "'")
+fifa$InchesHeight = (as.numeric(fifa_sh$Feet)*12+as.numeric(fifa_sh$Inches))
+
+temp_weight <- str_split(fifa$Weight, "lbs")
+
+weightHolder = c()
+
+for(i in 1 : length(temp_weight)) #for each important word in the headline
+{
+  weightHolder[i] <- temp_weight[[i]][1]
+}
+
+fifa$LbsWeight <- as.numeric(weightHolder)
+
+fifa %>% ggplot(aes(x=InchesHeight, y=LbsWeight)) +
+  geom_point() +
+  labs(title="Soccer Player Height v Weight", x = "Height (inches)", y = "Weight (lbs)") +
+  stat_smooth(method = "lm", col = "red")
+
+fit_HvW <- lm(fifa$LbsWeight ~ fifa$InchesHeight)
+summary(fit_HvW)
+
+fifa %>% filter(Position == "LB" | Position == "LM") %>%
+  ggplot(aes(x=InchesHeight, y=LbsWeight, col = Position)) +
+  geom_point() +
+  facet_wrap(~Position) +
+  geom_smooth(method = "lm", col = "black") +
+  labs(title="Soccer Player Height v Weight", x = "Height (inches)", y = "Weight (lbs)")
+
+fit_HvW_LB <- lm(fifa$LbsWeight[fifa$Position == "LB"] ~ fifa$InchesHeight[fifa$Position == "LB"])
+summary(fit_HvW_LB)
+
+fit_HvW_LM <- lm(fifa$LbsWeight[fifa$Position == "LM"] ~ fifa$InchesHeight[fifa$Position == "LM"])
+summary(fit_HvW_LM)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Baby Names - Question 1
+```{r}
+library(dplyr)
+
+baby = read.csv2("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 5/yob2016.txt", header=FALSE) # read in name data
+
+df <- data.frame(Name = baby[,1], Sex = baby[,2], Count = baby[,3])
+df$Name <- as.character(df$Name)
+str(df)
+
+writeLines(df$Name[str_detect(df$Name,"yyy")])
+
+y2016 <- df[-c(212),]
+dim(df)
+dim(y2016)
+```
+
+# Baby Names - Question 2
+```{r}
+baby = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 5/yob2015.txt", header=FALSE) # read in name data
+
+y2015 <- data.frame(Name = baby[,1], Sex = baby[,2], Count = baby[,3])
+y2015$Name <- as.character(y2015$Name)
+tail(y2015, 10)
+
+final <- merge(y2016, y2015, by = c("Name" = "Name", "Sex" = "Sex"))
+head(final)
+
+```
+
+# Baby Names - Question 3
+
+```{r}
+final <- final %>% mutate(total = Count.x + Count.y)
+head(final, 2)
+
+final %>% arrange(desc(total))
+
+final %>% filter(Sex == "F") %>% arrange(desc(total))
+
+temp <- final %>% filter(Sex == "F") %>% arrange(desc(total))
+PopularFemaleNames <- data.frame(Name = temp$Name, Count = temp$total)
+write.csv(PopularFemaleNames, file = "PopularFemaleNames.csv")
+
+
+```
+
+# Baby Names - Data Viz
+
+```{r}
+final_viz <- final %>% filter(Sex == "F") %>% arrange(desc(total))
+final_viz = final_viz[1:10,]
+
+final_viz %>% ggplot(aes(x = reorder(Name, -total), y = total)) + 
+  geom_bar(stat="identity", fill = "pink") + 
+  labs(title="10 Most Popular Female Baby Names", x="", y="number of babies") +
+  theme_minimal()
+```
+
+
+
+
+
+
+
+
+
