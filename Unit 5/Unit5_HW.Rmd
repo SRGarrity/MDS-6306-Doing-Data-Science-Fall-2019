@@ -38,14 +38,20 @@ matchDF %>% ggplot(aes(x = Colors, fill = Colors)) + geom_bar()+ scale_fill_manu
 ```{r}
 playerbb = read.csv("/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 2/PlayersBBall.csv", header = TRUE)
 # levels(playerbb$position) = droplevels(playerbb$position,"")
+# playerbb$position = droplevels(playerbb$position,"")
 
 temp_var <- str_split_fixed(playerbb$height, n = 2, pattern = "-")
 
 playerbb$inches_height = (as.numeric(temp_var[,1])*12)+as.numeric(temp_var[,2])
 
+playerbb$position = droplevels(playerbb$position,NA)
+
 ggplot(playerbb,aes(x=inches_height, fill = position))+ 
     geom_histogram() +
   facet_wrap(~position)
+
+### Play around
+playerbb2 <- playerbb %>% mutate(TotalInches = str_split(height, "-"))
 ```
 
 # Part 2 - FIFA
