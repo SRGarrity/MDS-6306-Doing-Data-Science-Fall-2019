@@ -1,0 +1,35 @@
+---
+title: "DDS Unit 6 HW"
+author: "Steven Garrity"
+date: "9/29/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1 - Titanic Dataset (woohoo, a classic!)
+```{r}
+library(jsonlite)
+library(RCurl)
+library(XML)
+
+### Import and tidy the data
+data <-getURL("https://public.opendatasoft.com/api/records/1.0/search/?dataset=titanic-passengers&rows=2000&facet=survived&facet=pclass&facet=sex&facet=age&facet=embarked")
+
+temp <- fromJSON(data, flatten = FALSE)
+class(temp) # it is a list.
+
+df <- as.data.frame(temp$records$fields)
+rm(temp, data)
+
+### Apply k-NN classifier. Classify died/did-not-die based on age and class.
+
+
+
+
+```
+
