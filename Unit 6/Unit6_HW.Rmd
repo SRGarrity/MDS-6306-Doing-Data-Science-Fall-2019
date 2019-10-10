@@ -29,7 +29,10 @@ rm(temp, data)
 
 ### Perform a little EDA
 library(ggplot2)
+library(GGally)
 library(tidyverse)
+
+df %>% select(age, pclass, survived) %>% ggpairs(aes(color=survived, alpha=0.2)) + ggtitle("Titantic Survival")
 
 df %>% ggplot(aes(x=age, fill=pclass)) +
   geom_histogram() +
@@ -46,33 +49,10 @@ library(e1071)
 
 #### First, omit any rows where one of the observations is NA
 df_reduced <- df %>% select(age, pclass, survived) %>% na.omit()
-df_reduced_scaled <- data.frame(Zage = scale(df_reduced$age), Zpclass = scale(df_reduced$pclass), 
-                       Survived = df_reduced$survived)
+df_reduced_scaled <- data.frame(Zage = scale(df_reduced$age), Zpclass = scale(df_reduced$pclass), Survived = df_reduced$survived)
 
+#### Grid search to tune hyperparameter, "k"
 splitPerc = .75
-trainIndices = sample(1:dim(df_reduced_scaled)[1],round(splitPerc * dim(df_reduced_scaled)[1]))
-train = df_reduced_scaled[trainIndices,]
-test = df_reduced_scaled[-trainIndices,]
-dim(train)
-str(train)
-dim(test)
-str(test)
-
-### set up loop to tune the "k" hyperparameter
-accs = data.frame(accuracy = numeric(30), k = numeric(30))
-
-for(i in 1:30)
-{
-  classifications = knn(train[,c(1,2)], test[,c(1,2)], train$Survived, prob = TRUE, k = i)
-  table(test$Survived,classifications)
-  CM = confusionMatrix(table(test$Survived,classifications))
-  accs$accuracy[i] = CM$overall[1]
-  accs$k[i] = i
-}
-
-plot(accs$k,accs$accuracy, type = "l", xlab = "k")
-
-###
 iterations = 250
 numks = 100
 
@@ -95,24 +75,20 @@ for(i in 1:numks)
 }
 
 MeanAcc = colMeans(masterAcc)
+plot(seq(1,numks,1),MeanAcc*100, type = "l", xlab = "k", ylab = "Accuracy (%)")
 
-plot(seq(1,numks,1),MeanAcc, type = "l")
-
+# find index of k that produces highest accuracy:
 which.max(MeanAcc)
 
-
 ###
-
-
-
 classifications <- knn.cv(df_reduced_scaled[,1:2],df_reduced_scaled$Survived, k = 60, prob = TRUE)
 confusionMatrix(classifications,df_reduced$survived)
 class_probabilities <- attr(classifications, 'prob') # we can extract probabilities for each prediction. They are stored as an attribute of the "classifications" variable.
 
 table(classifications ,df_reduced_scaled$Survived)
 
+###################################3
 ### predict self-survival based on age...iterate for each class (need to scale!!!)
-
 scaled_age <- scale(c(min(df_reduced$age), 40, max(df_reduced$age)))
 scaled_class <- scale(c(1,2,3))
 
@@ -121,7 +97,75 @@ for (i in 1:length(scaled_class))
   age_class = data.frame(Age = scaled_age[2], Class = scaled_class[i])
   print(knn(df_reduced_scaled[,1:2], age_class, df_reduced_scaled$Survived, k = 60, prob = TRUE))
 }
-  
 
+###################################
+### Classify the test data set
+temp <- read.csv('/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 6/titanic_test.csv',header = TRUE)
+
+df_test <- temp
+rm(temp)
+dim(df_test)
+df_test_reduced <- df_test %>% select(Age, Pclass) %>% na.omit()
+dim(df_test_reduced)
+
+test_classifications <- knn(df_reduced_scaled[,1:2], df_test_reduced, df_reduced_scaled$Survived, k = 60, prob = TRUE)
 ```
 
+# Part 2 - Iris Data k-nn classification
+```{r}
+iris_df <- iris %>% select(Sepal.Length, Sepal.Width, Species)
+
+iris_df %>% ggplot(aes(x=Sepal.Length, y=Sepal.Width, col=Species)) +
+  geom_point()
+# doesn't look there is any reason to scale
+
+#### Grid search to tune hyperparameter, "k"
+splitPerc = .70
+iterations = 250
+numks = 90
+
+masterAcc = matrix(nrow = iterations, ncol = numks)
+  
+for(j in 1:iterations)
+{
+# accs = data.frame(accuracy = numeric(30), k = numeric(30)) # I don't think we need this?
+trainIndices = sample(1:dim(iris_df)[1],round(splitPerc * dim(iris_df)[1]))
+train = iris_df[trainIndices,]
+test = iris_df[-trainIndices,]
+for(i in 1:numks)
+{
+  classifications = knn(train[,c(1,2)],test[,c(1,2)],train$Species, prob = TRUE, k = i)
+  table(classifications,test$Species)
+  CM = confusionMatrix(table(classifications,test$Species))
+  masterAcc[j,i] = CM$overall[1]
+}
+
+}
+
+MeanAcc = colMeans(masterAcc)
+plot(seq(1,numks,1),MeanAcc*100, type = "l", xlab = "k", ylab = "Accuracy (%)")
+
+# find index of k that produces highest accuracy:
+which.max(MeanAcc)
+
+#### now try leave-one-out cross validation
+numks = 90
+accs = data.frame(accuracy = numeric(numks), k = numeric(numks))
+
+for(i in 1:numks)
+{
+  classifications = knn.cv(iris_df[,c(1,2)],iris_df$Species, prob = TRUE, k = i)
+  table(iris_df$Species,classifications)
+  CM = confusionMatrix(table(iris_df$Species,classifications))
+  accs$accuracy[i] = CM$overall[1]
+  accs$k[i] = i
+}
+
+plot(accs$k,accs$accuracy*100, type = "l", xlab = "k", ylab = "Classification Accuracy (%)")
+# find index of k that produces highest accuracy:
+which.max(accs$accuracy)
+
+classifications <- knn.cv(iris_df[,c(1,2)], iris_df$Species, prob = TRUE, k = which.max(accs$accuracy))
+confusionMatrix(classifications,iris_df$Species)
+
+```

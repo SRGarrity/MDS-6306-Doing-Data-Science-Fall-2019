@@ -3,6 +3,8 @@ title: "Unit 6 Overall"
 author: "Bivin"
 date: "5/1/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -49,16 +51,24 @@ knn(irisVersVirg[,c(1,2)], df, irisVersVirg$Species, k = 15, prob = TRUE)
 #Virginica v. Versicolor
 set.seed(6)
 splitPerc = .75
-irisVersVirg = iris %>% filter(Species == "versicolor" | Species == "virginica")
+irisVersVirg <- iris %>% filter(Species == "versicolor" | Species == "virginica")
 summary(irisVersVirg)
-irisVersVirg = droplevels(irisVersVirg,exclude = "setosa")
+irisVersVirg <- droplevels(irisVersVirg,exclude = "setosa")
 summary(irisVersVirg)
 
+# split into train and test subsets
 trainIndices = sample(1:dim(irisVersVirg)[1],round(splitPerc * dim(irisVersVirg)[1]))
 train = irisVersVirg[trainIndices,]
 test = irisVersVirg[-trainIndices,]
+dim(train)
+dim(test)
 
 irisVersVirg %>% ggplot(aes(x = Sepal.Length,Sepal.Width,color = Species)) + geom_point()
+
+# 150 fold cv
+classifications = knn.cv(iris[,1:4],iris$Species, k = 10)
+table(classifications, iris$Species)
+confusionMatrix(table(classifications, iris$Species))
 
 # k = 3
 classifications = knn(train[,c(1,2)],test[,c(1,2)],train$Species, prob = TRUE, k = 3)
@@ -78,6 +88,12 @@ confusionMatrix(table(test$Species,classifications))
 
 # k = 20
 classifications = knn(train[,c(1,2)],test[,c(1,2)],train$Species, prob = TRUE, k = 20)
+table(test$Species,classifications)
+CM = confusionMatrix(table(test$Species,classifications))
+CM$overall[1]
+
+# k = 50
+classifications = knn(train[,c(1,2)],test[,c(1,2)],train$Species, prob = TRUE, k = 50)
 table(test$Species,classifications)
 CM = confusionMatrix(table(test$Species,classifications))
 CM$overall[1]
@@ -183,7 +199,7 @@ confusionMatrix(classifications,dfTrain$Qualify)
 #Example Default
 ```{r}
 #read in data Credit Default.csv
-credit = read.csv(file.choose(),header = TRUE)
+credit = read.csv('/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 6/Credit Default.csv',header = TRUE)
 
 #make resposnse a factor rather than 0,1
 credit$default.payment.next.month = factor(credit$default.payment.next.month,labels = c("NoDefault","Default"))
