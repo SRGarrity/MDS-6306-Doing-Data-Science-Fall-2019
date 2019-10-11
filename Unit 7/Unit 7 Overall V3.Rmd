@@ -3,14 +3,16 @@ title: "Unit 7 Overall"
 author: "Bivin"
 date: "5/1/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 #Volleyball Example
 ```{r}
-vball = read.csv(file.choose(),header = TRUE)
+vball = read.csv('/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 7/Bayes Volleyball.csv',header = TRUE)
 vball
 
-install.packages("e1071") #naiveBayes()
+# install.packages("e1071") #naiveBayes()
 library(e1071)
 
 model = naiveBayes(Volleyball~.,data = vball)
@@ -18,6 +20,8 @@ predict(model,vball[,c(1,2)])
 
 df = data.frame(Outlook = "Rain", Wind = "Hi")
 predict(model,df) #just classifications
+
+# calculate the posterior probability:
 predict(model,df, type = "raw") #gives probabilities 
 
 ```
@@ -51,13 +55,14 @@ library(plyr)
 library(jsonlite)
 library(dplyr)
 library(tidyverse)
+library(caret)
 
-NYTIMES_KEY = "OG89fUubcS8FXofVrLA4dmIOHh5omiFa" #Your Key Here … get from NTY API website
+NYTIMES_KEY = "rCMGPuQRWtKSG83NavoMJUzxESf0gCln" #Your Key Here … get from NTY API website
 
 # Let's set some parameters
 term <- "Central+Park+Jogger" # Need to use + to string together separate words
 begin_date <- "19900419"
-end_date <- "19900619"
+end_date <- "19900819"
 
 baseurl <- paste0("http://api.nytimes.com/svc/search/v2/articlesearch.json?q=",term,
                   "&begin_date=",begin_date,"&end_date=",end_date,
@@ -78,6 +83,11 @@ for(i in 0:maxPages){
 }
 
 allNYTSearch <- rbind_pages(pages)
+dim(allNYTSearch)
+allNYTSearch$response.docs.headline.main
+
+# this is where we will find the label that will be used for training:
+allNYTSearch$response.docs.type_of_material
 
 
 #Segmentation
@@ -92,7 +102,8 @@ allNYTSearch %>%
 
 #Make another column of News versus Other ... The labels
 
-allNYTSearch$NewsOrOther = ifelse(allNYTSearch$response.docs.type_of_material == "News","News","Other")
+allNYTSearch$NewsOrOther = ifelse(allNYTSearch$response.docs.type_of_material == "News","News","Other") # In English: if type_of_material == "News", then call it news. Otherwise, call it "Other".
+
 #There is an NA in NewsOrOther
 
 # Visualize coverage of News or Other
@@ -112,6 +123,9 @@ trainInd = sample(seq(1,dim(allNYTSearch)[1],1),round(.7*dim(allNYTSearch)[1]))
 allNYTSearchTrain = allNYTSearch[trainInd,]
 allNYTSearchTest = allNYTSearch[-trainInd,]
 
+dim(allNYTSearchTrain)
+dim(allNYTSearchTest)
+
 
 #This function returns P(News | Keyword) 
 #P(News|KW) = P(KW|News)* P(News) / P(KW)
@@ -119,20 +133,24 @@ Pnews_word = function(key_word, trainingSet, alphaLaplace = 1, betaLaplace = 1) 
 {
   trainingSet$response.docs.headline.main = unlist(str_replace_all(trainingSet$response.docs.headline.main,"[^[:alnum:] ]", "")) #Take out all but alpha numeric characters from training headlines
   
-  #print(key_word)
+  print(key_word)
   NewsGroup = trainingSet[trainingSet$NewsOrOther == "News",]
   OtherGroup = trainingSet[trainingSet$NewsOrOther == "Other",]
   
-  pNews = dim(NewsGroup)[1] / (dim(NewsGroup)[1] + dim(OtherGroup)[1])
+  pNews = dim(NewsGroup)[1] / (dim(NewsGroup)[1] + dim(OtherGroup)[1]) #probability of news (this is the prior?)
   pOther = 1 - pNews
   
+  # probability of key word, given news (pKWGivenNews):
   pKWGivenNews = (length(str_which(NewsGroup$response.docs.headline.main,regex(str_c("\\b",key_word,"\\b",sep=""),ignore.case = TRUE)))+alphaLaplace)/(dim(NewsGroup)[1]+betaLaplace)
+  
+  # probability of key word, given Other (pKWGivenOther):
   pKWGivenOther = (length(str_which(OtherGroup$response.docs.headline.main,regex(str_c("\\b",key_word,"\\b",sep=""),ignore.case = TRUE)))+alphaLaplace)/(dim(OtherGroup)[1]+betaLaplace)
   
+  # probability of key word (pKW):
   pKW = length(str_which(trainingSet$response.docs.headline.main,regex(str_c("\\b",key_word,"\\b",sep=""),ignore.case = TRUE)))/dim(trainingSet)[1]
   
-  pNewsGivenKW = pKWGivenNews*pNews/pKW
-  pOtherGivenKW = pKWGivenOther*pOther/pKW
+  pNewsGivenKW = pKWGivenNews*pNews/pKW # Bayes Theorem
+  pOtherGivenKW = pKWGivenOther*pOther/pKW # Bayes Theorem
   
   return(pNewsGivenKW)
 }
@@ -141,6 +159,10 @@ theScoreHolderNews = c()
 theScoreHolderOther = c()
 articleScoreNews = 0;
 articleScoreOther = 0;
+
+# test the model:
+Pnews_word("Trump", allNYTSearchTrain)
+Pnews_word("jogger", allNYTSearchTrain)
 
 
 for (i in 1 : dim(allNYTSearchTest)[1])  #This loop iterates over the articles in the Test Set
@@ -156,13 +178,16 @@ theText = unlist(str_split(str_replace_all(allNYTSearchTest[i,]$response.docs.he
 wordsToTakeOut = stopwords()
 
 # put word boundaries stopwords so that we don't detect partial words later
-wordsToTakeOut = str_c(wordsToTakeOut,collapse = "\\b|\\b") 
+wordsToTakeOut = str_c(wordsToTakeOut,collapse = "\\b|\\b") # collapse on word boundary
 wordsToTakeOut = str_c("\\b",wordsToTakeOut,"\\b")
 #wordsToTakeOut
 
 importantWords = theText[!str_detect(theText,regex(wordsToTakeOut,ignore_case = TRUE))]
 
+### compare before and after:
+#theText
 #importantWords
+
 
   for(j in 1 : length(importantWords))  #This loop iterates over the important words in the headline
   {
