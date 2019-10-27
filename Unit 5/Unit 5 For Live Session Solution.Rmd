@@ -3,8 +3,11 @@ title: "Unit 5 For Live Session Solution"
 author: "Bivin"
 date: "9/23/2019"
 output: html_document
+<<<<<<< HEAD
 editor_options: 
   chunk_output_type: console
+=======
+>>>>>>> upstream/master
 ---
 
 

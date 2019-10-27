@@ -88,6 +88,7 @@ splitPerc = 0.70 # Train/Test split
 for(j in 1:iterations)
 {
   # set.seed(floor(runif(1,1,100)))
+  set.seed(j)
   trainIndices = sample(seq(1:length(dfClean$age)),round(.7*length(dfClean$age)))
   trainTitanic = dfClean[trainIndices,]
   testTitanic = dfClean[-trainIndices,]
