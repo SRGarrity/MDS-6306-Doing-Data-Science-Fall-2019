@@ -130,7 +130,7 @@ for (i in 1:numSampIntercepts)
 }
 
 #Used a simple histogram (rather than from ggplot) since not for presentation
-hist(sampInterceptHolder, main = str_c("Distribution of Intercpets from ", numSampIntercepts, " Samples"), xlab = "Sample Intercpet")
+hist(sampInterceptHolder, main = str_c("Distribution of Intercepts from ", numSampIntercepts, " Samples"), xlab = "Sample Intercpet")
 summary(sampInterceptHolder)
 ```
 
@@ -193,7 +193,8 @@ mtcars3 = mtcars %>% mutate(wt2 = wt^2, wt3 = wt^3)
 fit = lm(mpg~wt+wt2+wt3, mtcars3)
 summary(fit)
 preds = predict(fit)
-mtcars %>% ggplot(aes(x = wt, y = mpg)) + geom_point() +geom_line(data = mtcars, aes( x = wt, y = preds, col = "red"))
+mtcars %>% ggplot(aes(x = wt, y = mpg)) + geom_point() +
+  geom_line(data = mtcars, aes( x = wt, y = preds, col = "red"))
 ```
 
 
