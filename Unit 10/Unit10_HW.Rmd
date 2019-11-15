@@ -1,0 +1,178 @@
+---
+title: "Unit10_HW"
+author: "Steven Garrity"
+date: "10/30/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(GGally)
+```
+
+# Problem 1:
+Fit the model: mpg = b0 + b1*weight
+```{r}
+cars <- read.csv('/Users/stevengarrity/SMU_MSDS/DS6306_DoingDataScience/DDS_Git/Unit 10/cars.csv', header=TRUE)
+
+str(cars)
+dim(cars)
+
+cars %>% ggplot(aes(x=Weight, y=MPG)) +
+  geom_point(col="grey35") +
+  geom_smooth(method="lm", col="dodgerblue") +
+  labs(x="Weight", y="MPG")
+
+mpg_model <- lm(MPG~Weight, data=cars)
+summary(mpg_model)
+
+# Hypothesis test:
+# Step 1: H0: b1 is equal to 0, Ha: b1 is not equal to 0
+# Step 2: Calculate t-crit
+qt(0.975, dim(cars)[1]-2)
+# Step 3: Calculate t-stat (-29.73)
+# Step 4: Calculate p-value
+pt(-29.73, dim(cars)[1]-2)
+# Step 5: Reject H0
+# Step 6: Conclusions and confidence interval
+confint(mpg_model, level=0.95)
+# sanity check the interval
+mpg_model$coefficients[[2]] + (qt(0.975, dim(cars)[1]-2)*0.0002577)
+mpg_model$coefficients[[2]] - (qt(0.975, dim(cars)[1]-2)*0.0002577)
+```
+
+# Problem 2:
+Conduct n-fold (leave one out) cross-validation on:
+1. mpg = b0 + b1*weight
+2. mpg = b0 + b1*weight + b2*weight^2
+```{r}
+# N-fold cross validation
+iterations = dim(cars)[[1]]
+MSPEHolderModel1 = numeric(iterations)
+MSPEHolderModel2 = numeric(iterations)
+
+carsNfold <- cars %>% select(MPG, Weight) %>% mutate(Weight2 = Weight^2)
+
+for (i in 1:iterations)
+{
+  carsTrain = carsNfold[-i,]
+  carsTest = carsNfold[i,]
+  Model1_fit = lm(MPG ~ Weight, data = carsTrain)
+  Model1_Preds = predict(Model1_fit, newdata = carsTest)
+  
+  #MSPE Model 1
+  MSPE = mean((carsTest$MPG - Model1_Preds)^2)
+  MSPEHolderModel1[i] = MSPE
+  
+  #Model 2
+  Model2_fit = lm(MPG ~ Weight + Weight2, data = carsTrain)
+  Model2_Preds = predict(Model2_fit,newdata = carsTest)
+  MSPE = mean((carsTest$MPG - Model2_Preds)^2)
+  MSPEHolderModel2[i] = MSPE
+}
+
+mean(MSPEHolderModel1)
+mean(MSPEHolderModel2)
+
+#alternative: use the "train" function with LOOCV option
+
+###### use model to predict MPG for weight = 2000 lbs
+pred2000 <- data.frame(MPG=NA, Weight=2000, Weight2=2000^2)
+predict(Model2_fit, newdata = pred2000, interval = "prediction")
+
+###### plotting model fits:
+Model_1 <- lm(MPG~Weight, data=carsNfold)
+carsNfold %>% ggplot(aes(x = Weight, y = MPG)) + 
+  geom_point(col="grey35") +
+  geom_line(data = carsNfold, aes(x = Weight, y = Model_1$fitted.values),
+            color = "dodgerblue", size=1.5) +
+  labs(title="Model: MPG = b0 + b1*Weight")
+
+Model_2 <- lm(MPG~Weight+Weight2, data=carsNfold)
+carsNfold %>% ggplot(aes(x = Weight, y = MPG)) + 
+  geom_point(col="grey35") +
+  geom_line(data = carsNfold, aes(x = Weight, y = Model_2$fitted.values),
+            color = "dodgerblue", size=1.5) +
+  labs(title="Model: MPG = b0 + b1*Weight + b2*Weight^2")
+
+```
+
+# Question 3a
+Impute the missing horsepowers by fitting a regression model.
+```{r}
+carsHP <- cars %>% 
+select(Horsepower, Cylinders, Displacement, Weight, Acceleration, Year, Origin) %>% na.omit()
+
+carsHP %>% ggpairs(aes(color = Origin))
+# alternative paired plots:
+plot(cars[,-c(1,2)])
+
+carsHP$Acceleration2 = carsHP$Acceleration^2
+carsHP$logCylinders = log(carsHP$Cylinders)
+
+hp_model <- lm(Horsepower~Displacement+Weight+Acceleration, data=carsHP)
+summary(hp_model)
+
+carsHP %>% ggplot(aes(x = Weight, y = Horsepower)) + 
+  geom_point(col="grey35") +
+  geom_line(data = carsHP, aes(x = Weight, y = hp_model$fitted.values),
+            color = "dodgerblue", size=1.5) +
+  labs(title="Model: MPG = b0 + b1*Displacement + b2*Weight + b3*Acceleration")
+
+
+# fill missing Horsepower with hp_model
+cars_missing <- cars[which(is.na(cars$Horsepower)),]
+filled_HP <- predict(hp_model, newdata=cars_missing)
+cars$Horsepower[which(is.na(cars$Horsepower))] <- filled_HP
+
+cars$Horsepower05 <- cars$Horsepower^0.5
+
+hp2_model <- lm(MPG~Horsepower+Horsepower05, data=cars)
+summary(hp2_model)
+
+cars %>% ggplot(aes(x = Horsepower, y = MPG)) + 
+  geom_point(col="grey35") +
+  geom_line(data = cars, aes(x = Horsepower, y = hp2_model$fitted.values),
+            color = "dodgerblue", size=1.5) +
+  labs(title="Model: MPG = b0 + b1*Horsepower + b2*Horsepower^0.5")
+
+
+# predict MPG for car with 250 Horsepower
+pred250 <- data.frame(MPG=NA, Horsepower=250, Horsepower05=250^0.5)
+predict(hp2_model, newdata = pred250)
+
+
+##########################################################
+### 3D plotting
+axis_x <- seq(min(carsHP$Horsepower), max(carsHP$Horsepower), length = 100)
+axis_y <- seq(min(carsHP$Weight), max(carsHP$Weight), length = 100)
+
+#Sample points
+surfaceHP <- expand.grid(axis_y,Horsepower = axis_x,KEEP.OUT.ATTRS = F)
+surfaceHP$Horsepower <- predict.lm(hp_model, newdata = carsHP)
+surfaceHP <- acast(surfaceHP, Horsepower ~ Weight, value.var = "mpg") #y ~ x
+
+surface_plot <- plot_ly(carsHP, 
+                        x = ~Horsepower, 
+                        y = ~Weight, 
+                        z = ~Acceleration,
+                        text = "HP", 
+                        type = "scatter3d",
+                        mode = "markers")
+
+
+surface_plot <- add_trace(p = surface_plot,
+                          z = surfaceMPG,
+                          x = axis_x,
+                          y = axis_y,
+                          type = "surface")
+
+surface_plot
+
+
+
+```

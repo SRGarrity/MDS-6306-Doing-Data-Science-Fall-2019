@@ -1,0 +1,10 @@
+name: old_faithful
+title:
+username:
+account: garrity
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1461759
+bundleId: 2584892
+url: https://garrity.shinyapps.io/old_faithful/
+when: 1573609363.8514
