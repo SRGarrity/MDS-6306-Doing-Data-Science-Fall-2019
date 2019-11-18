@@ -1,0 +1,246 @@
+---
+title: "HW11_DDS"
+author: "Steven Garrity"
+date: "11/17/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Problem 1 - Simple Exponential Smoothing:
+```{r}
+
+library(fpp2)
+
+# 1. SES MODEL FOR AUS AIR 
+data(ausair)
+
+#returns a ts object
+air = window(ausair, start = 1990, end = 2004)
+
+# Always plot the data first! 
+plot(air,ylab = "Airline Passegners", xlab = "Year", main = "Airline Passengers")
+
+#fit 3 different simple exponential smoothing models ... how are they different?
+# what does the h paramter do? 
+fit1 = ses(air, initial = "simple",alpha = .2,h = 3)
+fit2 = ses(air,initial = "simple",alpha = .6, h = 3)
+fit3 = ses(air, h = 3) #defaults
+
+# the forecast package has a nice accuracy funciton with various metrics just pass it the 
+# the model and the data!  (This is the "training" data)
+accuracy(fit1, ausair)
+accuracy(fit2, ausair)
+accuracy(fit3, ausair)
+
+#Reset the plot
+plot(air,ylab = "Airline Passegners", xlab = "Year", type = "o", xlim = c(1990, 2008),ylim = c(15,50), main = "Simple Exponential Smooth", pch=16)
+
+#Plot the estimated values from the models .. the "fitted" values are the training values.
+lines(fitted(fit1), col = "blue", type = "o", pch=16)
+lines(fitted(fit2), col = "red", type = "o", pch=16)
+lines(fitted(fit3), col = "green", type = "o", pch=16)
+
+# the  $mean values are the forecasts.
+lines(fit1$mean, col = "blue", type = "o")
+lines(fit2$mean, col = "red", type = "o")
+lines(fit3$mean, col = "green", type = "o")
+legend("topleft", lty=1, col=c("blue","red","green"), 
+       c(expression(alpha == 0.2), expression(alpha == 0.6),
+         expression(alpha == 0.89)), pch=1)
+
+# These are the actual values!  Compare visually with the forecasts!
+air2008 = window(ausair, start = 1990, end = 2007)
+points(air2008, type = "o")
+
+legend("topleft", lty=1, col=c("blue","red","green","black"), 
+       c(expression(alpha == 0.2), expression(alpha == 0.6),
+         expression(alpha == 0.89), "observed"), pch=1)
+
+# Compare the forecasts with the actual values with various fit metrics.  
+accuracy(fit1, air2008)
+accuracy(fit2, air2008)
+accuracy(fit3, air2008)
+```
+
+# Problem 2 - Holt Linear Trend:
+```{r}
+#2 Holt's Linear Trend Model for AUS AIR
+fit1h = holt(air, alpha = .8, beta = .2, initial = "simple", h = 5)
+fit2h = holt(air, alpha = .8, beta = .2, initial = "simple", exponential = TRUE, h = 5)
+
+# Check out estimated values of the "training" data from the first holt model 
+fitted(fit1h)
+# Check out the forecast value (h of them)
+fit1h$mean
+
+# Reset the Plot!
+plot(air,ylab = "Airline Passegners", xlab = "Year", type = "o", pch=16, xlim = c(1990, 2009),ylim = c(15,60), main="Using Holt method from fpp2 package")
+#Plot each models estimated values of the training data (Do these one by one to see the differences)
+lines(fitted(fit1h),col = "blue", type= "o", pch=16)
+lines(fitted(fit2h), col = "red", type= "o")
+#Plot each models forecasts (Do these one by one to see the differences)
+lines(fit1h$mean, col = "blue", type= "o")
+lines(fit2h$mean,col = "red", type= "o")
+
+# Fit another model ... damped!  
+fit3h = holt(air, alpha = .8, beta = .2, damped = TRUE, initial = "optimal", h = 5)
+# Plot the fitted value (estimated from triaining data)
+lines(fitted(fit3h), col = "darkgreen", type= "o", pch=16)
+# Plot the forecasts
+lines(fit3h$mean,col = "darkgreen", type= "o")
+
+# Fit another model ... what is the difference?  
+fit4h = holt(air, alpha = .8, beta = .2, damped = TRUE, initial = "optimal", exponential = TRUE, h = 5)
+# Plot the fitted value (estimated from triaining data)
+lines(fitted(fit4h), col = "cyan", type= "o", pch=16)
+#Plot the forecasts
+lines(fit4h$mean,col = "cyan", type= "o")
+
+air2008 = window(ausair, start = 1990, end = 2009)
+points(air2008, type = "o")
+
+legend("topleft", lty=1, col=c("blue","red","darkgreen", "cyan", "black"), 
+       c("standard", "exponential", "damped","damped+exponential", "observed"), pch=1)
+
+
+# Reset the Plot! And test ETS function
+# info for model: https://otexts.com/fpp2/estimation-and-model-selection.html
+# info for forecast: https://otexts.com/fpp2/the-forecast-package-in-r.html
+plot(air,ylab = "Airline Passegners", xlab = "Year", type = "o", pch=16, xlim = c(1990, 2009),ylim = c(15,60), main="ETS method from fpp2")
+fit5e <- ets(air, model="ZZZ", damped=TRUE, alpha=0.8, beta=0.2)
+forecast5e <- forecast(fit5e, h=5)
+lines(fitted(fit5e), col="purple", type="o", pch=16)
+lines(forecast5e$mean, col="purple", type="o")
+
+fit6e <- ets(air, model="ZZZ", damped=FALSE, alpha=0.8, beta=0.2)
+forecast6e <- forecast(fit6e, h=5)
+lines(fitted(fit6e), col="red", type="o", pch=16)
+lines(forecast6e$mean, col="red", type="o")
+
+air2008 = window(ausair, start = 1990, end = 2009)
+points(air2008, type = "o")
+
+legend("topleft", lty=1, col=c("purple","red","black"), 
+       c("damped", "not damped","observed"), pch=1)
+
+c(fit5e$aic, fit6e$aic)
+c(fit5e$bic,fit6e$bic)
+
+autoplot(fit5e)
+
+accuracy(fit1h, ausair)
+accuracy(forecast6e, ausair)
+
+
+# with implicit Test set... it figures out by the time which are training and which are test. 
+accuracy(fit1h, ausair)
+accuracy(fit2h, ausair)
+accuracy(fit3h, ausair)
+
+#with explicit Test set ... (same output)
+airTest = window(ausair, start = 2005)
+accuracy(fit1h, airTest)
+accuracy(fit2h, airTest)
+accuracy(fit3h, airTest)
+
+#Add the actual values to visually compare forecasts to actual values
+air2008 = window(ausair, start = 1990, end = 2009)
+points(air2008, type = "o")
+```
+
+https://otexts.com/fpp2/estimation-and-model-selection.html
+
+# Problem 3 - XXX:
+```{r}
+#3. Seasonal Trend
+
+#Load the data
+data("austourists")
+# Read about the dataset!
+?austourists
+
+
+# Always plot the data first!
+plot(austourists)
+
+# returns a ts object.  
+aust = window(austourists,start = 1999, end = 2004)
+
+#fit an additive and multiplicative model
+fit1s = hw(aust,seasonal = "additive",h = 40)
+fit2s = hw(aust,seasonal = "multiplicative",h = 40)
+
+#Plot the original data
+plot(aust,ylab = "Australian Tourists", xlab = "Year", type = "o", xlim = c(1999, 2014),ylim = c(15,60), main="Holt-Winters")
+#add the fitted values from the model (of the training data)
+lines(fitted(fit1s),col = "blue", type= "o")
+lines(fitted(fit2s), col = "red", type= "o")
+
+#Now add the forecasts (add these one at a time)
+lines(fit1s$mean, col = "blue", type= "l")
+lines(fit2s$mean,col = "red", type= "l")
+
+#Compare the accuracy
+accuracy(fit1s,austourists)
+accuracy(fit2s,austourists)
+
+#add the actual values to visually compare the forecasts to the actual values. 
+points(austourists, type = "l")
+
+legend("topleft", lty=1, col=c("blue","red","black"), 
+       c("additive", "multiplicative","observed"), pch=1)
+```
+
+# Part 4 - Max temp exercise:
+```{r}
+library(fpp2)
+data("maxtemp")
+
+mtemp = window(maxtemp, start = 1990, end = 2016)
+
+plot(mtemp,ylab = "Max Temperature (deg C)", xlab = "Year", main = "Melbourne Maximum Temperature", xlim=c(1990,2021))
+
+fit1 <- ses(mtemp, initial = "simple", alpha = .5,h = 5)
+lines(fitted(fit1), col = "blue", type = "l")
+lines(fit1$mean, col = "blue", type = "o")
+
+fit2 <- holt(mtemp, alpha = .5, beta = .2, damped = TRUE, initial = "optimal", exponential = TRUE, h = 5)
+lines(fitted(fit2), col = "red", type = "l")
+lines(fit2$mean, col = "red", type = "o")
+
+fit3 <- ets(mtemp, model="AAN", alpha = 0.5, beta=0.2, damped = TRUE)
+forecast3 <- forecast(fit3, h=5)
+lines(fitted(fit3), col="green", type="l")
+lines(forecast3$mean, col="green", type="o")
+
+legend("topleft", lty=1, col=c("blue","red","green"), 
+       c("SES", "Holt","ETS"), pch=1)
+
+
+accuracy(fit1$fitted, maxtemp)
+accuracy(fit2$fitted, maxtemp)
+accuracy(forecast3$fitted, maxtemp)
+
+print(c(fit3$aic, fit3$aicc, fit3$bic))
+```
+
+
+# From Live Session:
+```{r}
+# Example creating ts object
+df = data.frame(sales = c(3,6,9,11,3,8,8,4,5,8,6,9))
+dfts = ts(df$sales,start = c(2018,4), frequency = 12)
+dfts
+
+autoplot(maxtemp)
+
+tsdf <- window(maxtemp, start=1990)
+
+```
+
+
+
+
+
+
